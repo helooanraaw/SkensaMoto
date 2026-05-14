@@ -48,7 +48,7 @@
 
                 <!-- Tombol (Kanan) -->
                 <div class="hidden lg:flex items-center justify-end w-1/4">
-                    <a href="/login" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-xl transition-all hover:-translate-y-0.5">Booking Antrian</a>
+                    <a href="/login" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-xl transition-all">Booking Antrian</a>
                 </div>
             </div>
         </div>
@@ -88,7 +88,7 @@
                         Layanan servis profesional seperti di Dealer Resmi, langsung di SMK Negeri 1 Denpasar. Dikerjakan oleh siswa-siswa terbaik Teknik Sepeda Motor di bawah pengawasan ketat instruktur tersertifikasi industri.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4 items-center relative z-20">
-                        <a href="/login" class="bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-xl font-bold text-lg shadow-2xl transition-all flex items-center justify-center gap-2 w-full sm:w-auto hover:-translate-y-1">
+                        <a href="/login" class="bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-xl font-bold text-lg shadow-2xl transition-all flex items-center justify-center gap-2 w-full sm:w-auto ">
                             Mulai Booking
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -116,7 +116,7 @@
             </div>
 
             <!-- Booking Steps -->
-            <div class="flex items-center justify-between mb-10 bg-white border border-gray-200 rounded-full px-10 py-4">
+            <div class="flex items-center justify-between mb-10 bg-white border border-gray-200 rounded-lg px-10 py-4">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 font-bold flex items-center justify-center">1</div>
                     <span class="font-semibold text-blue-950">Pilih Tanggal</span>
@@ -135,13 +135,13 @@
             <div class="grid grid-cols-5 gap-5">
                 @forelse($schedules as $key => $schedule)
                     @php
-                        // Hitung tanggal dari index (Senin = 0, Selasa = 1, dst)
-                        $monday = \Carbon\Carbon::now('Asia/Makassar')->startOfWeek(\Carbon\Carbon::MONDAY);
-                        $dateObj = $monday->copy()->addDays($key)->locale('id');
+                        $dateObj = \Carbon\Carbon::parse($schedule->tanggal)->locale('id');
                         $isToday   = $dateObj->isToday();
-                        $isFull    = $schedule && ($schedule->status === 'penuh' || $schedule->quota <= 0);
-                        $isHoliday = $schedule && $schedule->status === 'libur';
-                        $isEmpty   = $schedule === null;
+                        $sisaKuotaMenit = $schedule->kapasitas_menit - $schedule->terpakai_menit;
+                        $sisaKuotaMotor = max(0, floor($sisaKuotaMenit / 60)); // Asumsi 1 motor = 60 menit
+                        $isFull    = $sisaKuotaMotor <= 0;
+                        $isHoliday = $schedule->kapasitas_menit == 0;
+                        $isEmpty   = false;
                     @endphp
 
                     @if($isEmpty)
@@ -173,7 +173,7 @@
                             <div class="text-center">
                                 <p class="text-xs font-black text-gray-500 uppercase tracking-widest mb-5">{{ $isToday ? 'HARI INI' : $dateObj->translatedFormat('l') }}</p>
                                 <p class="text-5xl font-black text-blue-950 leading-none mb-5">{{ $dateObj->format('j M') }}</p>
-                                <span class="inline-block bg-slate-100 text-slate-500 text-xs font-bold px-4 py-1.5 rounded-full">{{ substr($schedule->start_time,0,5) }} – {{ substr($schedule->end_time,0,5) }} WITA</span>
+                                <span class="inline-block bg-slate-100 text-slate-500 text-xs font-bold px-4 py-1.5 rounded-full">{{ substr($schedule->jam_buka,0,5) }} – {{ substr($schedule->jam_tutup,0,5) }} WITA</span>
                             </div>
                             <div class="w-full">
                                 <div class="py-3 text-center text-sm font-bold text-red-500 bg-red-50 border border-red-200 rounded-xl">Kuota Penuh</div>
@@ -185,10 +185,10 @@
                             <div class="text-center">
                                 <p class="text-xs font-black text-gray-500 uppercase tracking-widest mb-5">{{ $isToday ? 'HARI INI' : $dateObj->translatedFormat('l') }}</p>
                                 <p class="text-5xl font-black text-blue-950 leading-none mb-5 group-hover:text-green-600 transition-colors">{{ $dateObj->format('j M') }}</p>
-                                <span class="inline-block bg-slate-100 text-slate-500 text-xs font-bold px-4 py-1.5 rounded-full">{{ substr($schedule->start_time,0,5) }} – {{ substr($schedule->end_time,0,5) }} WITA</span>
+                                <span class="inline-block bg-slate-100 text-slate-500 text-xs font-bold px-4 py-1.5 rounded-full">{{ substr($schedule->jam_buka,0,5) }} – {{ substr($schedule->jam_tutup,0,5) }} WITA</span>
                             </div>
                             <div class="w-full">
-                                <div class="py-3 text-center text-sm font-bold text-green-600 bg-green-50 border border-green-200 rounded-xl group-hover:bg-green-100 transition-colors">Sisa {{ $schedule->quota }} Kuota</div>
+                                <div class="py-3 text-center text-sm font-bold text-green-600 bg-green-50 border border-green-200 rounded-xl group-hover:bg-green-100 transition-colors">Sisa {{ $sisaKuotaMotor }} Kuota</div>
                             </div>
                         </a>
                     @endif

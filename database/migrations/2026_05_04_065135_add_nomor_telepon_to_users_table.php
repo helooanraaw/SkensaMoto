@@ -6,17 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
-        Schema::table('bookings', function (Blueprint $table) {
-            $table->text('rejection_reason')->nullable()->after('status');
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('nomor_telepon')->nullable();
         });
     }
 
     public function down(): void
     {
-        Schema::table('bookings', function (Blueprint $table) {
-            $table->dropColumn('rejection_reason');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('nomor_telepon');
         });
     }
 };
