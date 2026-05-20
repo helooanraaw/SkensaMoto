@@ -11,7 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        \Illuminate\Support\Facades\DB::statement("ALTER TABLE users MODIFY COLUMN role VARCHAR(50) DEFAULT 'user'");
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('role', 50)->default('user')->change();
+        });
     }
 
     /**
@@ -19,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        \Illuminate\Support\Facades\DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('user', 'admin') DEFAULT 'user'");
+        Schema::table('users', function (Blueprint $table) {
+            $table->enum('role', ['user', 'admin'])->default('user')->change();
+        });
     }
 };
