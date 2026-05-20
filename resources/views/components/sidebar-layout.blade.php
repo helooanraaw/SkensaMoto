@@ -50,7 +50,7 @@
                 $antreanBadge = 0;
                 $pelangganBadge = 0;
 
-                if (in_array($userRole, ['admin', 'guru'])) {
+                if (in_array($userRole, ['superadmin', 'admin'])) {
                     $antreanBadge = \App\Models\Booking::where('status', 'pending')->count();
                 } elseif ($userRole === 'mekanik') {
                     $antreanBadge = \App\Models\Booking::where('status', 'approved')
@@ -65,7 +65,7 @@
                 }
             @endphp
 
-            @if(in_array($userRole, ['admin', 'guru', 'mekanik']))
+            @if(in_array($userRole, ['superadmin', 'admin', 'mekanik']))
             <!-- Workshop Staff Menus -->
             <div class="space-y-1">
                 <p class="px-4 text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3">Operasional</p>
@@ -94,7 +94,7 @@
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                     Stok Barang
                 </a>
-                @if(in_array(auth()->user()->role, ['admin', 'guru']))
+                @if(in_array(auth()->user()->role, ['superadmin', 'admin']))
                 <a href="{{ route('admin.services.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold {{ request()->routeIs('admin.services.*') ? 'bg-red-50 text-red-600' : 'text-slate-500 hover:bg-slate-50 hover:text-blue-950' }}">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
                     Paket Servis
@@ -102,7 +102,7 @@
                 @endif
             </div>
 
-            @if(auth()->user()->role === 'admin')
+            @if(auth()->user()->role === 'superadmin')
             <div class="space-y-1">
                 <p class="px-4 text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3">Sistem</p>
                 <a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold {{ request()->routeIs('admin.users.*') ? 'bg-red-50 text-red-600' : 'text-slate-500 hover:bg-slate-50 hover:text-blue-950' }}">
@@ -209,7 +209,7 @@
                                     <p class="text-xs text-slate-500 mt-1">Bengkel telah mengirimkan estimasi biaya untuk motor Anda. Harap segera konfirmasi.</p>
                                 </a>
                             @endif
-                            @if(in_array(auth()->user()->role, ['admin', 'guru']) && $antreanBadge > 0)
+                            @if(in_array(auth()->user()->role, ['superadmin', 'admin']) && $antreanBadge > 0)
                                 <a href="{{ route('admin.bookings.index') }}" class="block p-3 hover:bg-slate-50 rounded-lg transition-colors">
                                     <p class="text-sm font-bold text-blue-950">Ada Booking Baru Masuk!</p>
                                     <p class="text-xs text-slate-500 mt-1">Terdapat {{ $antreanBadge }} antrean servis yang menunggu persetujuan (Approve) Anda.</p>

@@ -17,7 +17,7 @@
                 <h2 class="text-xl font-black text-blue-950">Daftar Barang & Sparepart</h2>
                 <p class="text-sm text-slate-500 font-medium">Kelola stok oli, busi, dan suku cadang lainnya.</p>
             </div>
-            @if(in_array(auth()->user()->role, ['admin', 'guru']))
+            @if(in_array(auth()->user()->role, ['superadmin', 'admin']))
             <button @click="showCreateModal = true" class="px-5 py-2.5 bg-red-600 text-white rounded-full text-sm font-bold shadow-md hover:bg-red-700 hover:-translate-y-0.5 transition-all">
                 + Tambah Barang
             </button>
@@ -49,7 +49,7 @@
                             </td>
                             <td class="py-4 px-6 text-slate-700 font-medium">Rp {{ number_format($item->harga_satuan, 0, ',', '.') }}</td>
                             <td class="py-4 px-6 text-right space-x-2">
-                                @if(in_array(auth()->user()->role, ['admin', 'guru']))
+                                @if(in_array(auth()->user()->role, ['superadmin', 'admin']))
                                     <button @click="openEditModal({{ $item->toJson() }})" class="text-blue-600 hover:text-blue-800 font-bold px-2 py-1 bg-blue-50 hover:bg-blue-100 rounded transition-colors">Edit</button>
                                     <form action="{{ route('admin.inventory.destroy', $item->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Yakin ingin menghapus barang ini?');">
                                         @csrf

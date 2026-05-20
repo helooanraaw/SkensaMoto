@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkensaMotoHub - TEFA TSM SMK Negeri 1 Denpasar</title>
+    <title>SkensaMoto - Skensa Motor SMK Negeri 1 Denpasar</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <!-- Menggunakan Font Urbanist -->
@@ -42,7 +42,7 @@
                     <div class="flex items-center gap-8 px-2 transition-all">
                         <a href="#" class="text-blue-950 hover:text-red-600 font-bold transition-all group-[.is-scrolled]/nav:text-blue-950 group-[.is-scrolled]/nav:hover:text-red-600">Beranda</a>
                         <a href="#services" class="text-blue-950 hover:text-red-600 font-bold transition-all group-[.is-scrolled]/nav:text-blue-950 group-[.is-scrolled]/nav:hover:text-red-600">Layanan Standar</a>
-                        <a href="#schedule" class="text-white/90 hover:text-white font-bold transition-all drop-shadow-md group-[.is-scrolled]/nav:text-blue-950 group-[.is-scrolled]/nav:drop-shadow-none group-[.is-scrolled]/nav:hover:text-red-600">Jadwal Booking</a>
+                        <a href="#schedule" class="text-blue-950 hover:text-red-600 font-bold transition-all group-[.is-scrolled]/nav:text-blue-950 group-[.is-scrolled]/nav:hover:text-red-600">Jadwal Booking</a>
                     </div>
                 </div>
 
@@ -88,7 +88,7 @@
                         Layanan servis profesional seperti di Dealer Resmi, langsung di SMK Negeri 1 Denpasar. Dikerjakan oleh siswa-siswa terbaik Teknik Sepeda Motor di bawah pengawasan ketat instruktur tersertifikasi industri.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4 items-center relative z-20">
-                        <a href="/login" class="bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-xl font-bold text-lg shadow-2xl transition-all flex items-center justify-center gap-2 w-full sm:w-auto ">
+                        <a href="/login" class="bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 w-full sm:w-auto ">
                             Mulai Booking
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -103,7 +103,7 @@
     </div>
 
     <!-- Live Schedule Board -->
-    <div id="schedule" class="py-16 bg-gray-50 border-b border-gray-200">
+    <div id="schedule" class="py-16 bg-gray-50 border-b border-gray-200" x-data="{ showModal: false, activeBookings: [], activeDate: '' }">
         <div class="max-w-7xl mx-auto px-6 lg:px-8">
 
             <!-- Header -->
@@ -115,19 +115,75 @@
                 </p>
             </div>
 
-            <!-- Booking Steps -->
-            <div class="flex items-center justify-between mb-10 bg-white border border-gray-200 rounded-lg px-10 py-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 font-bold flex items-center justify-center">1</div>
-                    <span class="font-semibold text-blue-950">Pilih Tanggal</span>
+            <!-- Booking Steps: Horizontal Hover Cards -->
+            <div class="mb-12 grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-8 items-start">
+                <!-- Step 1 -->
+                <div class="bg-white border rounded-2xl overflow-hidden transition-all duration-300 cursor-default"
+                     x-data="{ hovered: false }" @mouseenter="hovered = true" @mouseleave="hovered = false"
+                     :class="hovered ? 'border-red-400 shadow-xl  md:-translate-y-1' : 'border-slate-200 shadow-sm'">
+                    <div class="px-6 py-6 flex flex-col items-center gap-4 text-center relative z-10 bg-white transition-colors duration-300" :class="hovered ? 'bg-red-50/30' : ''">
+                        <div class="w-12 h-12 rounded-full font-black text-xl flex items-center justify-center transition-all duration-300"
+                             :class="hovered ? 'bg-red-600 text-white scale-110' : 'bg-red-50 text-red-500'">1</div>
+                        <span class="font-bold text-lg transition-colors" :class="hovered ? 'text-red-600' : 'text-blue-950'">Pilih Tanggal</span>
+                    </div>
+                    <div x-show="hovered" 
+                         x-transition:enter="transition ease-out duration-300" 
+                         x-transition:enter-start="opacity-0 -translate-y-4" 
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-200" 
+                         x-transition:leave-start="opacity-100 translate-y-0" 
+                         x-transition:leave-end="opacity-0 -translate-y-4" 
+                         style="display: none;">
+                        <div class="px-6 pb-6 pt-2 text-center text-slate-500 text-sm font-medium leading-relaxed border-t border-slate-50">
+                            Cek ketersediaan jadwal pada kalender di bawah. Klik jadwal yang masih tersedia (warna hijau) untuk mulai melakukan antrean.
+                        </div>
+                    </div>
                 </div>
-                <div class="flex items-center gap-3 opacity-40">
-                    <div class="w-10 h-10 rounded-full bg-slate-200 text-slate-600 font-bold flex items-center justify-center">2</div>
-                    <span class="font-semibold text-blue-950">Isi Keluhan Motor</span>
+
+                <!-- Step 2 -->
+                <div class="bg-white border rounded-2xl overflow-hidden transition-all duration-300 cursor-default"
+                     x-data="{ hovered: false }" @mouseenter="hovered = true" @mouseleave="hovered = false"
+                     :class="hovered ? 'border-red-400 shadow-xl/10 md:-translate-y-1' : 'border-slate-200 shadow-sm'">
+                    <div class="px-6 py-6 flex flex-col items-center gap-4 text-center relative z-10 bg-white transition-colors duration-300" :class="hovered ? 'bg-red-50/30' : ''">
+                        <div class="w-12 h-12 rounded-full font-black text-xl flex items-center justify-center transition-all duration-300"
+                             :class="hovered ? 'bg-red-600 text-white scale-110' : 'bg-red-50 text-red-500'">2</div>
+                        <span class="font-bold text-lg transition-colors" :class="hovered ? 'text-red-600' : 'text-blue-950'">Isi Keluhan Motor</span>
+                    </div>
+                    <div x-show="hovered" 
+                         x-transition:enter="transition ease-out duration-300" 
+                         x-transition:enter-start="opacity-0 -translate-y-4" 
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-200" 
+                         x-transition:leave-start="opacity-100 translate-y-0" 
+                         x-transition:leave-end="opacity-0 -translate-y-4" 
+                         style="display: none;">
+                        <div class="px-6 pb-6 pt-2 text-center text-slate-500 text-sm font-medium leading-relaxed border-t border-slate-50">
+                            Setelah memilih jadwal, silakan login dan tuliskan kendala pada motor Anda agar mekanik kami bisa menyiapkan penanganan yang tepat.
+                        </div>
+                    </div>
                 </div>
-                <div class="flex items-center gap-3 opacity-40">
-                    <div class="w-10 h-10 rounded-full bg-slate-200 text-slate-600 font-bold flex items-center justify-center">3</div>
-                    <span class="font-semibold text-blue-950">Bawa Motor Sesuai Jadwal</span>
+
+                <!-- Step 3 -->
+                <div class="bg-white border rounded-2xl overflow-hidden transition-all duration-300 cursor-default"
+                     x-data="{ hovered: false }" @mouseenter="hovered = true" @mouseleave="hovered = false"
+                     :class="hovered ? 'border-red-400 shadow-xl /10 md:-translate-y-1' : 'border-slate-200 shadow-sm'">
+                    <div class="px-6 py-6 flex flex-col items-center gap-4 text-center relative z-10 bg-white transition-colors duration-300" :class="hovered ? 'bg-red-50/30' : ''">
+                        <div class="w-12 h-12 rounded-full font-black text-xl flex items-center justify-center transition-all duration-300"
+                             :class="hovered ? 'bg-red-600 text-white scale-110' : 'bg-red-50 text-red-500'">3</div>
+                        <span class="font-bold text-lg transition-colors" :class="hovered ? 'text-red-600' : 'text-blue-950'">Bawa Sesuai Jadwal</span>
+                    </div>
+                    <div x-show="hovered" 
+                         x-transition:enter="transition ease-out duration-300" 
+                         x-transition:enter-start="opacity-0 -translate-y-4" 
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-200" 
+                         x-transition:leave-start="opacity-100 translate-y-0" 
+                         x-transition:leave-end="opacity-0 -translate-y-4" 
+                         style="display: none;">
+                        <div class="px-6 pb-6 pt-2 text-center text-slate-500 text-sm font-medium leading-relaxed border-t border-slate-50">
+                            Datanglah ke bengkel MotoSkensa sesuai dengan jadwal yang telah Anda pilih tanpa perlu mengantre lama dari awal.
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -136,10 +192,10 @@
                 @forelse($schedules as $key => $schedule)
                     @php
                         $dateObj = \Carbon\Carbon::parse($schedule->tanggal)->locale('id');
+                        $dateStr = $dateObj->format('Y-m-d');
                         $isToday   = $dateObj->isToday();
                         $sisaKuotaMenit = $schedule->kapasitas_menit - $schedule->terpakai_menit;
-                        $sisaKuotaMotor = max(0, floor($sisaKuotaMenit / 60)); // Asumsi 1 motor = 60 menit
-                        $isFull    = $sisaKuotaMotor <= 0;
+                        $isFull    = $sisaKuotaMenit <= 0;
                         $isHoliday = $schedule->kapasitas_menit == 0;
                         $isEmpty   = false;
                     @endphp
@@ -181,16 +237,19 @@
                         </div>
 
                     @else
-                        <a href="/login" class="block bg-white border {{ $isToday ? 'border-red-400' : 'border-gray-200 hover:border-green-400' }} rounded-2xl p-7 flex flex-col items-center justify-between transition-all duration-200 group" style="min-height:290px">
+                        <button @click="showModal = true; activeDate = '{{ $dateObj->translatedFormat('d F Y') }}'; activeBookings = window.publicBookings['{{ $dateStr }}'] || []" class="block w-full text-left bg-white border {{ $isToday ? 'border-red-400' : 'border-gray-200 hover:border-green-400' }} rounded-2xl p-7 flex flex-col items-center justify-between transition-all duration-200 group cursor-pointer" style="min-height:290px">
                             <div class="text-center">
                                 <p class="text-xs font-black text-gray-500 uppercase tracking-widest mb-5">{{ $isToday ? 'HARI INI' : $dateObj->translatedFormat('l') }}</p>
                                 <p class="text-5xl font-black text-blue-950 leading-none mb-5 group-hover:text-green-600 transition-colors">{{ $dateObj->format('j M') }}</p>
                                 <span class="inline-block bg-slate-100 text-slate-500 text-xs font-bold px-4 py-1.5 rounded-full">{{ substr($schedule->jam_buka,0,5) }} – {{ substr($schedule->jam_tutup,0,5) }} WITA</span>
                             </div>
                             <div class="w-full">
-                                <div class="py-3 text-center text-sm font-bold text-green-600 bg-green-50 border border-green-200 rounded-xl group-hover:bg-green-100 transition-colors">Sisa {{ $sisaKuotaMotor }} Kuota</div>
+                                <div class="py-3 px-2 text-center text-sm font-bold text-green-600 bg-green-50 border border-green-200 rounded-xl group-hover:bg-green-100 transition-colors">
+                                    Sisa Waktu: {{ $sisaKuotaMenit }} Menit
+                                </div>
+                                <div class="mt-2 text-center text-[10px] text-gray-400 font-semibold group-hover:text-green-600 uppercase tracking-wider">Lihat Antrean &rarr;</div>
                             </div>
-                        </a>
+                        </button>
                     @endif
 
                 @empty
@@ -201,7 +260,82 @@
             </div>
 
         </div>
+
+        <!-- MODAL ANTREAN ALPINE -->
+        <div x-cloak x-show="showModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 overflow-y-auto">
+            <div @click.away="showModal = false" class="bg-white rounded-[24px] shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all my-8">
+                <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                    <div>
+                        <h3 class="text-lg font-black text-blue-950">Daftar Antrean</h3>
+                        <p class="text-sm font-bold text-red-600" x-text="activeDate"></p>
+                    </div>
+                    <button @click="showModal = false" class="text-slate-400 hover:text-red-500 transition-colors">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                
+                <div class="p-6">
+                    <template x-if="activeBookings.length === 0">
+                        <div class="text-center py-10">
+                            <div class="w-16 h-16 bg-slate-100 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            </div>
+                            <p class="text-lg font-bold text-slate-400">Belum ada antrean di tanggal ini.</p>
+                            <p class="text-sm text-slate-400 mt-2">Jadilah yang pertama booking!</p>
+                        </div>
+                    </template>
+
+                    <template x-if="activeBookings.length > 0">
+                        <div class="space-y-4">
+                            <template x-for="(b, idx) in activeBookings" :key="b.id">
+                                <div class="p-4 border border-slate-100 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-red-200 transition-colors bg-white">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-10 h-10 bg-red-50 text-red-600 rounded-full flex items-center justify-center font-black text-lg border border-red-100 shadow-sm shrink-0">
+                                            <span x-text="idx + 1"></span>
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-blue-950 flex items-center gap-2">
+                                                <span x-text="b.kendaraan"></span>
+                                            </p>
+                                            <p class="text-xs font-bold text-slate-500 mt-1 uppercase tracking-wider" x-text="b.plat_nomor_masked"></p>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col items-end gap-2 w-full sm:w-auto">
+                                        <!-- Status Badge -->
+                                        <template x-if="b.status === 'pending'">
+                                            <span class="px-3 py-1 bg-orange-50 text-orange-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-orange-100 whitespace-nowrap">Menunggu Konfirmasi</span>
+                                        </template>
+                                        <template x-if="b.status === 'approved'">
+                                            <span class="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-blue-100 whitespace-nowrap">Antrean Disetujui</span>
+                                        </template>
+                                        <template x-if="b.status === 'in_progress'">
+                                            <span class="px-3 py-1 bg-yellow-50 text-yellow-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-yellow-100 whitespace-nowrap">Sedang Dikerjakan</span>
+                                        </template>
+                                        <template x-if="b.status === 'completed'">
+                                            <span class="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-100 whitespace-nowrap">Selesai</span>
+                                        </template>
+                                        
+                                        <!-- Paket Servis -->
+                                        <p class="text-xs font-bold text-slate-400 max-w-[200px] truncate text-right" x-text="b.paket" :title="b.paket"></p>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-between items-center">
+                    <p class="text-xs font-bold text-slate-400">*Plat nomor disensor sebagian untuk menjaga privasi.</p>
+                    <a href="/login" class="px-6 py-2.5 bg-red-600 text-white font-bold rounded-full text-sm shadow-md hover:bg-red-700 transition-colors">Booking Sekarang</a>
+                </div>
+            </div>
+        </div>
+
     </div>
+    
+    <script>
+        window.publicBookings = @json($publicBookings);
+    </script>
 
     <!-- Services Section -->
     <div id="services" class="py-20 bg-white border-t border-gray-200">
@@ -212,48 +346,62 @@
                 <p class="mt-3 text-blue-950 max-w-2xl mx-auto font-medium">Kami mengadopsi standar operasional Dealer Resmi. Sparepart yang digunakan adalah suku cadang orisinil dan mekanik bekerja menggunakan SOP industri.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Service 1 -->
-                <div class="bg-white border border-gray-200 rounded-xl p-8 hover:border-red-600 hover:shadow-lg transition group">
-                    <div class="w-12 h-12 bg-red-100 text-red-600 rounded-lg flex items-center justify-center mb-6 group-hover:bg-red-600 group-hover:text-white transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-bold text-blue-950 mb-2">Servis Berkala (Tune Up)</h3>
-                    <p class="text-blue-950 mb-6 text-sm leading-relaxed font-medium">Paket pemeriksaan rutin mulai dari pembersihan karburator/injeksi, cek busi, setel klep, hingga cek kelistrikan layaknya SOP AHASS.</p>
-                    <div class="text-sm font-bold text-red-600 border-t border-gray-100 pt-4">Estimasi Biaya Jasa: Rp 50.000</div>
-                </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+                @forelse($packages as $paket)
+                    @php
+                        $isPopular = $paket->bookings_count > 0 && $paket->bookings_count >= $maxBookings;
+                    @endphp
+                    <div class="bg-white border {{ $isPopular ? 'border-2 border-red-600 shadow-lg' : 'border-gray-200 hover:border-red-600 hover:shadow-lg' }} rounded-xl p-8 relative transition group">
+                        @if($isPopular)
+                            <div class="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg shadow-sm">Paling Sering Dipesan</div>
+                        @endif
+                        
+                        <div class="w-12 h-12 {{ $isPopular ? 'bg-red-600 text-white' : 'bg-red-100 text-red-600 group-hover:bg-red-600 group-hover:text-white' }} rounded-lg flex items-center justify-center mb-6 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        
+                        <h3 class="text-lg font-bold text-blue-950 mb-2">{{ $paket->nama_paket }}</h3>
+                        <p class="text-blue-950 mb-6 text-sm leading-relaxed font-medium">{{ $paket->deskripsi ?? 'Pemeriksaan standar sesuai panduan mekanik.' }}</p>
+                        
+                        <div class="text-sm border-t border-gray-100 pt-4">
+                            @if($paket->harga_jasa == 0)
+                                <span class="font-bold text-emerald-600 flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    Gratis Biaya Jasa
+                                </span>
+                                <div class="text-xs text-slate-500 mt-1 font-medium">(Hanya membayar harga produk oli)</div>
+                            @else
+                                <span class="font-bold text-slate-500">Estimasi Jasa:</span> <span class="font-bold text-red-600">Mulai Rp {{ number_format($paket->harga_jasa, 0, ',', '.') }}</span>
+                            @endif
 
-                <!-- Service 2 -->
-                <div class="bg-white border-2 border-red-600 rounded-xl p-8 relative shadow-lg">
-                    <div class="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">Paling Sering Dipesan</div>
-                    <div class="w-12 h-12 bg-red-600 text-white rounded-lg flex items-center justify-center mb-6">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
+                            @if(stripos($paket->nama_paket, 'oli') !== false)
+                                <div class="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs">
+                                    <p class="font-bold text-blue-950 mb-2 flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        Kisaran Harga Oli Orisinil:
+                                    </p>
+                                    <ul class="space-y-1.5 text-slate-600 font-medium">
+                                        <li class="flex justify-between"><span>Oli Mesin Matic</span> <span class="font-bold text-blue-950">Rp 45.000 - Rp 65.000</span></li>
+                                        <li class="flex justify-between"><span>Oli Mesin Bebek/Manual</span> <span class="font-bold text-blue-950">Rp 40.000 - Rp 55.000</span></li>
+                                        <li class="flex justify-between"><span>Oli Mesin Sport (1L)</span> <span class="font-bold text-blue-950">Rp 60.000 - Rp 85.000</span></li>
+                                        <li class="flex justify-between border-t border-slate-200/60 pt-1 mt-1"><span>Oli Transmisi/Gardan</span> <span class="font-bold text-blue-950">Rp 15.000 - Rp 20.000</span></li>
+                                    </ul>
+                                    <p class="text-[10px] text-slate-400 mt-2 italic">*Estimasi harga oli resmi AHM. Pilihan merk oli lain tersedia di bengkel.</p>
+                                </div>
+                            @endif
+                        </div>
                     </div>
-                    <h3 class="text-lg font-bold text-blue-950 mb-2">Ganti Oli Mesin & Gardan</h3>
-                    <p class="text-blue-950 mb-6 text-sm leading-relaxed font-medium">Penggantian oli dengan menggunakan pelumas asli pabrikan. Penting untuk menjaga performa mesin agar tetap halus dan awet.</p>
-                    <div class="text-sm font-bold text-red-600 border-t border-gray-100 pt-4">Harga Tergantung Jenis Oli</div>
-                </div>
-
-                <!-- Service 3 -->
-                <div class="bg-white border border-gray-200 rounded-xl p-8 hover:border-red-600 hover:shadow-lg transition group">
-                    <div class="w-12 h-12 bg-red-100 text-red-600 rounded-lg flex items-center justify-center mb-6 group-hover:bg-red-600 group-hover:text-white transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-bold text-blue-950 mb-2">Servis Area CVT (Matic)</h3>
-                    <p class="text-blue-950 mb-6 text-sm leading-relaxed font-medium">Solusi motor matic yang tarikannya berat atau bergetar (gredek). Kami bersihkan dan beri pelumas ulang (grease) pada area transmisi.</p>
-                    <div class="text-sm font-bold text-red-600 border-t border-gray-100 pt-4">Estimasi Biaya Jasa: Rp 40.000</div>
-                </div>
+                @empty
+                    <div class="col-span-3 text-center py-8 text-slate-500 font-medium">Belum ada paket servis yang tersedia.</div>
+                @endforelse
             </div>
             
             <div class="mt-10 text-center">
-                <p class="text-sm text-blue-950 bg-gray-50 inline-block px-4 py-2 rounded-full border border-gray-200 font-medium">
-                    <span class="font-bold text-blue-950">Penting:</span> Biaya di atas hanya estimasi jasa. Jika ada sparepart yang perlu diganti, admin/mekanik akan konfirmasi ke Anda terlebih dahulu.
+                <p class="text-sm text-blue-950 bg-red-50 inline-block px-6 py-3 rounded-2xl border border-red-100 font-medium max-w-4xl leading-relaxed">
+                    <span class="font-black text-red-600 uppercase tracking-wider text-xs block mb-1">Catatan Penting</span>
+                    Harga yang tertera di atas adalah <strong class="font-bold">estimasi biaya jasa dasar</strong>. Total biaya akhir (termasuk harga oli, jenis sparepart, dan tingkat kesulitan bongkar-pasang tiap jenis motor) akan dikonfirmasikan secara transparan oleh mekanik kami <strong class="font-bold">sebelum pengerjaan dimulai</strong>.
                 </p>
             </div>
         </div>

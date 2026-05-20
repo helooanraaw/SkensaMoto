@@ -74,7 +74,19 @@
                                 <span class="text-xs text-slate-500">{{ $booking->kendaraan->plat_nomor }}</span>
                             </td>
                             <td class="py-4 px-6">
-                                <span class="block font-bold text-slate-700">{{ $booking->paket_servis->count() > 0 ? $booking->paket_servis->first()->nama_paket : 'Servis Umum' }}</span>
+                                <span class="block font-bold text-slate-700">
+                                    @if($booking->paket_servis->count() > 0)
+                                        <div class="flex flex-wrap gap-1 mb-1">
+                                            @foreach($booking->paket_servis as $paket)
+                                                <span class="inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-bold rounded uppercase tracking-wider border border-blue-100">
+                                                    {{ $paket->nama_paket }}
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <span class="inline-block px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded uppercase tracking-wider border border-slate-200">Servis Umum</span>
+                                    @endif
+                                </span>
                                 <span class="text-xs text-slate-500 truncate max-w-xs block">{{ $booking->keluhan }}</span>
                             </td>
                             <td class="py-4 px-6">
@@ -104,7 +116,7 @@
                                 <button @click="openDetail({{ $booking->toJson() }})" class="text-slate-600 hover:text-slate-900 font-bold px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded transition-colors mr-1">Detail</button>
 
                                 @if($booking->status == 'pending')
-                                    @if(in_array(auth()->user()->role, ['admin', 'guru']))
+                                    @if(in_array(auth()->user()->role, ['superadmin', 'admin']))
                                         <button @click="openApprove({{ $booking->toJson() }})" class="text-emerald-600 hover:text-emerald-800 font-bold px-2 py-1 bg-emerald-50 hover:bg-emerald-100 rounded transition-colors">Terima</button>
                                         <form action="{{ route('admin.bookings.reject', $booking->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Tolak booking ini?');">
                                             @csrf
@@ -121,8 +133,26 @@
                                         <button type="submit" class="text-blue-600 hover:text-blue-800 font-bold px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded transition-colors">Mulai Servis</button>
                                     </form>
                                 @elseif($booking->status == 'in_progress')
+                                    @php
+                                        $needsQuotation = false;
+                                        foreach($booking->paket_servis as $paket) {
+                                            if(str_contains(strtolower($paket->nama_paket), 'cek') || str_contains(strtolower($paket->nama_paket), 'kerusakan')) {
+                                                $needsQuotation = true;
+                                                break;
+                                            }
+                                        }
+                                    @endphp
+
                                     @if(is_null($booking->quotation_status))
-                                        <button @click="openQuotation({{ $booking->toJson() }})" class="text-indigo-600 hover:text-indigo-800 font-bold px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 rounded transition-colors">Kirim Estimasi</button>
+                                        @if($needsQuotation)
+                                            <button @click="openQuotation({{ $booking->toJson() }})" class="text-indigo-600 hover:text-indigo-800 font-bold px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 rounded transition-colors">Kirim Estimasi</button>
+                                        @else
+                                            <form action="{{ route('admin.bookings.complete', $booking->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Selesaikan servis ini?');">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="text-green-600 hover:text-green-800 font-bold px-3 py-1.5 bg-green-50 hover:bg-green-100 rounded transition-colors">Selesaikan Servis</button>
+                                            </form>
+                                        @endif
                                     @elseif($booking->quotation_status == 'sent')
                                         <span class="text-xs text-orange-600 font-bold bg-orange-50 px-3 py-1.5 rounded inline-block">Menunggu Persetujuan Pelanggan</span>
                                     @elseif($booking->quotation_status == 'approved')
@@ -164,16 +194,22 @@
                     @method('PATCH')
                     
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Pilih Jadwal Harian</label>
-                        <select name="id_jadwal" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50">
-                            <option value="">-- Pilih Tanggal & Kuota --</option>
-                            @foreach($schedules as $sch)
-                                <option value="{{ $sch->id }}" {{ $sch->terpakai_menit >= $sch->kapasitas_menit ? 'disabled' : '' }}>
-                                    {{ \Carbon\Carbon::parse($sch->tanggal)->format('d M Y') }} 
-                                    (Tersisa: {{ $sch->kapasitas_menit - $sch->terpakai_menit }} Menit)
-                                </option>
-                            @endforeach
-                        </select>
+                        <p class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Layanan yang Diminta</p>
+                        <div class="flex flex-wrap gap-2 mb-2" x-show="activeBooking?.paket_servis?.length > 0">
+                            <template x-for="paket in activeBooking?.paket_servis">
+                                <span class="inline-block px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg border border-blue-100" x-text="paket.nama_paket + ' (' + paket.estimasi_menit + ' mnt)'"></span>
+                            </template>
+                        </div>
+                        <p x-show="!activeBooking?.paket_servis || activeBooking?.paket_servis?.length === 0" class="text-sm font-medium text-slate-500 italic">Hanya Servis Umum / Pengecekan</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tanggal Permintaan Servis</label>
+                        <div class="w-full border border-slate-200 rounded-[14px] px-4 py-3 bg-slate-100 text-blue-950 font-bold flex items-center gap-2">
+                            <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <span x-text="activeBooking?.tanggal_formatted || activeBooking?.tanggal"></span>
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-1">*Sistem akan otomatis menyesuaikan jadwal dengan tanggal ini.</p>
                     </div>
 
                     <div>
@@ -291,6 +327,12 @@
                     </div>
 
                     <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase mb-1">Layanan yang Dipilih Pelanggan</p>
+                        <div class="flex flex-wrap gap-2 mb-4" x-show="activeBooking?.paket_servis?.length > 0">
+                            <template x-for="paket in activeBooking?.paket_servis">
+                                <span class="inline-block px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg border border-blue-100" x-text="paket.nama_paket"></span>
+                            </template>
+                        </div>
                         <p class="text-xs font-bold text-slate-400 uppercase mb-1">Keluhan Pelanggan</p>
                         <p class="text-sm font-medium text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200" x-text="activeBooking?.keluhan"></p>
                     </div>

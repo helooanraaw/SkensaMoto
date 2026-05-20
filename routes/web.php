@@ -12,8 +12,35 @@ Route::get('/', function () {
         ->orderBy('tanggal', 'asc')
         ->take(5)
         ->get();
+        
+    $packages = \App\Models\PaketServis::withCount('bookings')->get();
+    
+    // Temukan jumlah terbanyak (minimal 1 agar tidak semua dapat tag jika 0 semua)
+    $maxBookings = $packages->max('bookings_count') ?: 1;
 
-    return view('welcome', compact('schedules'));
+    // Get active bookings for these dates to show in landing page
+    $dates = $schedules->pluck('tanggal');
+    $bookingsQuery = \App\Models\Booking::whereIn('tanggal', $dates)
+        ->whereNotIn('status', ['rejected', 'cancelled']) // only active
+        ->with(['kendaraan', 'paket_servis'])
+        ->get();
+        
+    $publicBookings = $bookingsQuery->groupBy('tanggal')->map(function($dayBookings) {
+        return $dayBookings->map(function($b) {
+            $platParts = explode(' ', $b->kendaraan->plat_nomor);
+            $maskedPlat = count($platParts) >= 3 ? $platParts[0] . ' *** ' . end($platParts) : (strlen($b->kendaraan->plat_nomor) > 4 ? substr($b->kendaraan->plat_nomor, 0, 2) . ' *** ' . substr($b->kendaraan->plat_nomor, -2) : '***');
+            
+            return [
+                'id' => $b->id,
+                'status' => $b->status,
+                'kendaraan' => $b->kendaraan->merk . ' ' . $b->kendaraan->tipe,
+                'plat_nomor_masked' => $maskedPlat,
+                'paket' => $b->paket_servis->count() > 0 ? $b->paket_servis->pluck('nama_paket')->implode(', ') : 'Servis Umum',
+            ];
+        });
+    });
+
+    return view('welcome', compact('schedules', 'packages', 'maxBookings', 'publicBookings'));
 });
 
 Route::middleware('auth')->group(function () {
@@ -23,7 +50,7 @@ Route::middleware('auth')->group(function () {
 
     // Route for dashboard redirection based on role
     Route::get('/dashboard', function () {
-        if (auth()->user()->role === 'admin') {
+        if (in_array(auth()->user()->role, ['superadmin', 'admin', 'mekanik'])) {
             return redirect()->route('admin.dashboard');
         }
         return redirect()->route('user.dashboard');
@@ -33,6 +60,8 @@ Route::middleware('auth')->group(function () {
     Route::prefix('user')->name('user.')->group(function () {
         Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
         Route::post('/kendaraan', [UserController::class, 'storeKendaraan'])->name('kendaraan.store');
+        Route::put('/kendaraan/{kendaraan}', [UserController::class, 'updateKendaraan'])->name('kendaraan.update');
+        Route::delete('/kendaraan/{kendaraan}', [UserController::class, 'destroyKendaraan'])->name('kendaraan.destroy');
         Route::post('/booking', [UserController::class, 'storeBooking'])->name('booking.store');
         Route::patch('/booking/{booking}/approve-quotation', [UserController::class, 'approveQuotation'])->name('booking.approve_quotation');
         Route::get('/booking/{booking}/invoice', [UserController::class, 'downloadInvoice'])->name('booking.invoice');
@@ -46,36 +75,36 @@ Route::middleware('auth')->group(function () {
     });
 
     // ADMIN / WORKSHOP ROUTES
-    Route::middleware('role:admin,guru,mekanik')->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('role:superadmin,admin,mekanik')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
         
         Route::get('/schedules', [AdminController::class, 'schedules'])->name('schedules.index');
         
         Route::get('/bookings', [AdminController::class, 'bookings'])->name('bookings.index');
-        Route::patch('/bookings/{booking}/approve', [AdminController::class, 'approveBooking'])->name('bookings.approve')->middleware('role:admin,guru');
+        Route::patch('/bookings/{booking}/approve', [AdminController::class, 'approveBooking'])->name('bookings.approve')->middleware('role:superadmin,admin');
         Route::patch('/bookings/{booking}/start', [AdminController::class, 'startBooking'])->name('bookings.start');
         Route::post('/bookings/{booking}/send-quotation', [AdminController::class, 'sendQuotation'])->name('bookings.send_quotation');
         Route::patch('/bookings/{booking}/complete', [AdminController::class, 'completeBooking'])->name('bookings.complete');
-        Route::patch('/bookings/{booking}/reject', [AdminController::class, 'rejectBooking'])->name('bookings.reject')->middleware('role:admin,guru');
+        Route::patch('/bookings/{booking}/reject', [AdminController::class, 'rejectBooking'])->name('bookings.reject')->middleware('role:superadmin,admin');
         
         Route::get('/inventory', [AdminController::class, 'inventory'])->name('inventory.index');
-        Route::post('/inventory', [AdminController::class, 'storeInventory'])->name('inventory.store')->middleware('role:admin,guru');
-        Route::put('/inventory/{inventory}', [AdminController::class, 'updateInventory'])->name('inventory.update')->middleware('role:admin,guru');
-        Route::delete('/inventory/{inventory}', [AdminController::class, 'destroyInventory'])->name('inventory.destroy')->middleware('role:admin,guru');
+        Route::post('/inventory', [AdminController::class, 'storeInventory'])->name('inventory.store')->middleware('role:superadmin,admin');
+        Route::put('/inventory/{inventory}', [AdminController::class, 'updateInventory'])->name('inventory.update')->middleware('role:superadmin,admin');
+        Route::delete('/inventory/{inventory}', [AdminController::class, 'destroyInventory'])->name('inventory.destroy')->middleware('role:superadmin,admin');
 
         Route::get('/services', [AdminController::class, 'services'])->name('services.index');
-        Route::post('/services', [AdminController::class, 'storeService'])->name('services.store')->middleware('role:admin,guru');
-        Route::put('/services/{paketServis}', [AdminController::class, 'updateService'])->name('services.update')->middleware('role:admin,guru');
-        Route::delete('/services/{paketServis}', [AdminController::class, 'destroyService'])->name('services.destroy')->middleware('role:admin,guru');
+        Route::post('/services', [AdminController::class, 'storeService'])->name('services.store')->middleware('role:superadmin,admin');
+        Route::put('/services/{paketServis}', [AdminController::class, 'updateService'])->name('services.update')->middleware('role:superadmin,admin');
+        Route::delete('/services/{paketServis}', [AdminController::class, 'destroyService'])->name('services.destroy')->middleware('role:superadmin,admin');
 
-        Route::post('/schedules', [AdminController::class, 'storeSchedule'])->name('schedules.store')->middleware('role:admin,guru');
-        Route::delete('/schedules/{jadwalHarian}', [AdminController::class, 'destroySchedule'])->name('schedules.destroy')->middleware('role:admin,guru');
+        Route::post('/schedules', [AdminController::class, 'storeSchedule'])->name('schedules.store')->middleware('role:superadmin,admin');
+        Route::delete('/schedules/{jadwalHarian}', [AdminController::class, 'destroySchedule'])->name('schedules.destroy')->middleware('role:superadmin,admin');
 
-        Route::get('/settings', [AdminController::class, 'settings'])->name('settings.index')->middleware('role:admin');
-        Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update')->middleware('role:admin');
+        Route::get('/settings', [AdminController::class, 'settings'])->name('settings.index')->middleware('role:superadmin');
+        Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update')->middleware('role:superadmin');
 
-        Route::get('/users', [AdminController::class, 'users'])->name('users.index')->middleware('role:admin');
-        Route::patch('/users/{user}/role', [AdminController::class, 'updateUserRole'])->name('users.update_role')->middleware('role:admin');
+        Route::get('/users', [AdminController::class, 'users'])->name('users.index')->middleware('role:superadmin');
+        Route::patch('/users/{user}/role', [AdminController::class, 'updateUserRole'])->name('users.update_role')->middleware('role:superadmin');
     });
 });
 

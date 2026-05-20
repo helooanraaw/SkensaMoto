@@ -106,12 +106,55 @@
 
                     <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
                         @forelse($kendaraan as $k)
-                            <div class="border border-slate-200 p-4 rounded-2xl flex items-center gap-4 hover:border-red-300 hover:shadow-md transition bg-white relative overflow-hidden group">
-                                <div class="absolute right-0 top-0 w-16 h-full"></div>
-                                <div class="relative z-10">
-                                    <p class="font-black text-blue-950 text-lg uppercase">{{ $k->plat_nomor }}</p>
-                                    <p class="text-sm font-bold text-slate-500">{{ $k->merk }} {{ $k->tipe }} ({{ $k->tahun }})</p>
+                            <div class="border border-slate-200 p-4 rounded-2xl flex flex-col justify-center gap-4 hover:border-red-300 hover:shadow-md transition bg-white relative overflow-hidden group" x-data="{ isEditing: false }">
+                                <div x-show="!isEditing" class="relative z-10 flex items-center justify-between w-full">
+                                    <div>
+                                        <p class="font-black text-blue-950 text-lg uppercase">{{ $k->plat_nomor }}</p>
+                                        <p class="text-sm font-bold text-slate-500">{{ $k->merk }} {{ $k->tipe }} ({{ $k->tahun }})</p>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <button @click="isEditing = true" class="p-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition" title="Edit">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                        </button>
+                                        <form action="{{ route('user.kendaraan.destroy', $k) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus kendaraan ini? Penghapusan akan gagal jika motor sedang dalam proses servis.');" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="p-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition" title="Hapus">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
+
+                                <!-- Edit Form -->
+                                <form x-cloak x-show="isEditing" action="{{ route('user.kendaraan.update', $k) }}" method="POST" class="relative z-10 w-full space-y-3">
+                                    @csrf
+                                    @method('PUT')
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div class="col-span-2">
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase">Plat Nomor</label>
+                                            <input type="text" name="plat_nomor" value="{{ $k->plat_nomor }}" required class="w-full text-xs border-slate-200 rounded-lg px-2 py-1.5 focus:ring-red-500 focus:border-red-500 uppercase">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase">Tipe</label>
+                                            <select name="tipe" required class="w-full text-xs border-slate-200 rounded-lg px-2 py-1.5 focus:ring-red-500 focus:border-red-500">
+                                                <option value="{{ $k->tipe }}">{{ $k->tipe }} (Saat ini)</option>
+                                                <optgroup label="Matic"><option value="BeAT">BeAT</option><option value="Vario 125">Vario 125</option><option value="Vario 160">Vario 160</option><option value="Scoopy">Scoopy</option><option value="PCX 160">PCX 160</option><option value="ADV 160">ADV 160</option><option value="Genio">Genio</option></optgroup>
+                                                <optgroup label="Bebek"><option value="Supra X 125">Supra X 125</option><option value="Revo">Revo</option><option value="Supra GTR">Supra GTR</option></optgroup>
+                                                <optgroup label="Sport"><option value="CB150R">CB150R</option><option value="CBR150R">CBR150R</option><option value="CBR250RR">CBR250RR</option><option value="CRF150L">CRF150L</option><option value="Sonic 150R">Sonic 150R</option></optgroup>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase">Tahun</label>
+                                            <input type="number" name="tahun" value="{{ $k->tahun }}" required class="w-full text-xs border-slate-200 rounded-lg px-2 py-1.5 focus:ring-red-500 focus:border-red-500">
+                                        </div>
+                                        <input type="hidden" name="merk" value="Honda">
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button type="submit" class="flex-1 py-1.5 bg-blue-950 text-white text-xs font-bold rounded-lg hover:bg-blue-900 transition shadow-sm">Simpan</button>
+                                        <button type="button" @click="isEditing = false" class="flex-1 py-1.5 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-200 transition">Batal</button>
+                                    </div>
+                                </form>
                             </div>
                         @empty
                             <div class="sm:col-span-2 text-center py-6 text-slate-500 font-medium">
@@ -123,8 +166,12 @@
 
                 <!-- Riwayat Booking -->
                 <div class="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden">
-                    <div class="px-6 py-5 border-b border-slate-100 bg-slate-50">
+                    <div class="px-6 py-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                         <h3 class="text-lg font-extrabold text-blue-950">Riwayat Servis & Antrean</h3>
+                        <a href="{{ route('user.history') }}" class="text-xs font-bold text-red-600 hover:underline flex items-center gap-1">
+                            Lihat Semua
+                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </a>
                     </div>
                     <div class="p-6 space-y-4">
                         @forelse($bookings as $b)
@@ -136,9 +183,13 @@
                                         <span class="text-sm font-bold text-slate-600">{{ \Carbon\Carbon::parse($b->tanggal)->format('d M Y') }}</span>
                                     </div>
                                     @if($b->paket_servis->count() > 0)
-                                        <span class="inline-block px-2 py-1 mb-2 bg-blue-50 text-blue-700 text-xs font-bold rounded">
-                                            {{ $b->paket_servis->first()->nama_paket }}
-                                        </span>
+                                        <div class="flex flex-wrap gap-1 mb-2">
+                                            @foreach($b->paket_servis as $paket)
+                                                <span class="inline-block px-2 py-1 bg-blue-50 text-blue-700 text-[10px] font-bold rounded uppercase tracking-wider">
+                                                    {{ $paket->nama_paket }}
+                                                </span>
+                                            @endforeach
+                                        </div>
                                     @endif
                                     <p class="text-sm text-slate-500 leading-relaxed font-medium line-clamp-2">"{{ $b->keluhan }}"</p>
                                 </div>
@@ -179,7 +230,18 @@
                     </div>
                     <div class="p-6">
                         @if($kendaraan->count() > 0)
-                        <form action="{{ route('user.booking.store') }}" method="POST" class="space-y-5" x-data="{ packages: [], selectedPackage: null }" x-init="fetch('{{ route('user.api.packages') }}').then(r => r.json()).then(d => packages = d)">
+                        <form action="{{ route('user.booking.store') }}" method="POST" class="space-y-5" 
+                              x-data="{ 
+                                  packages: [], 
+                                  selectedPackages: [],
+                                  get calculateTotal() {
+                                      return this.packages.filter(p => this.selectedPackages.includes(p.id.toString())).reduce((sum, p) => sum + parseInt(p.harga_jasa), 0);
+                                  },
+                                  get needsEstimation() {
+                                      return this.packages.filter(p => this.selectedPackages.includes(p.id.toString())).some(p => p.nama_paket.toLowerCase().includes('servis') || p.nama_paket.toLowerCase().includes('cek'));
+                                  }
+                              }" 
+                              x-init="fetch('{{ route('user.api.packages') }}').then(r => r.json()).then(d => packages = d)">
                             @csrf
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Pilih Kendaraan</label>
@@ -190,18 +252,38 @@
                                 </select>
                             </div>
                             
-                            <div>
+                            <div class="space-y-3">
                                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Pilih Paket Servis</label>
-                                <select name="paket_id" x-model="selectedPackage" class="w-full border-slate-200 rounded-xl px-4 py-3 bg-slate-50 text-blue-950 font-bold focus:ring-red-500 focus:border-red-500">
-                                    <option value="">Lainnya / Servis Custom</option>
+                                <div class="grid grid-cols-1 gap-3 max-h-64 overflow-y-auto pr-2">
                                     <template x-for="p in packages" :key="p.id">
-                                        <option :value="p.id" x-text="`${p.nama_paket} (Rp ${p.harga_jasa.toLocaleString('id-ID')} - ${p.estimasi_menit} mnt)`"></option>
+                                        <label class="flex items-start gap-3 p-4 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors" :class="selectedPackages.includes(p.id.toString()) ? 'border-red-500 bg-red-50' : 'bg-white'">
+                                            <div class="pt-0.5">
+                                                <input type="checkbox" name="paket_ids[]" :value="p.id" x-model="selectedPackages" class="w-4 h-4 text-red-600 border-slate-300 rounded focus:ring-red-500">
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="flex justify-between items-start mb-1">
+                                                    <span class="font-bold text-sm text-blue-950" x-text="p.nama_paket"></span>
+                                                    <span class="font-black text-sm text-red-600" x-text="`Rp ${parseInt(p.harga_jasa).toLocaleString('id-ID')}`"></span>
+                                                </div>
+                                                <p class="text-xs text-slate-500 font-medium leading-relaxed mb-2" x-text="p.deskripsi"></p>
+                                                <div class="inline-flex items-center gap-1 text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-md">
+                                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                    <span x-text="`Estimasi: ${p.estimasi_menit} Menit`"></span>
+                                                </div>
+                                            </div>
+                                        </label>
                                     </template>
-                                </select>
-                                <div x-show="selectedPackage" class="mt-2 p-3 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-800 font-medium">
-                                    <template x-for="p in packages" :key="p.id">
-                                        <p x-show="p.id == selectedPackage" x-text="p.deskripsi"></p>
-                                    </template>
+                                </div>
+                                <!-- Logic for Cost Estimation -->
+                                <div x-show="selectedPackages.length > 0" x-cloak class="mt-4 p-4 rounded-xl border shadow-sm transition-all" :class="needsEstimation ? 'bg-orange-50 border-orange-200' : 'bg-green-50 border-green-200'">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <svg x-show="needsEstimation" class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        <svg x-show="!needsEstimation" class="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        <h4 class="font-bold text-sm" :class="needsEstimation ? 'text-orange-800' : 'text-green-800'" x-text="needsEstimation ? 'Estimasi Biaya Awal' : 'Total Biaya Pasti'"></h4>
+                                    </div>
+                                    <p class="text-2xl font-black mb-1" :class="needsEstimation ? 'text-orange-600' : 'text-green-600'" x-text="`Rp ${calculateTotal.toLocaleString('id-ID')}`"></p>
+                                    <p x-show="needsEstimation" class="text-xs font-medium text-orange-700 leading-relaxed">*Ini hanyalah biaya jasa/pengecekan. Estimasi total akhir (jika ada tambahan sparepart) akan dikirimkan oleh mekanik setelah pengecekan kerusakan.</p>
+                                    <p x-show="!needsEstimation" class="text-xs font-medium text-green-700 leading-relaxed">*Karena tidak ada pengecekan kerusakan, harga ini bersifat tetap dan sudah final.</p>
                                 </div>
                             </div>
 
@@ -219,8 +301,8 @@
                             </div>
 
                             <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Keluhan / Catatan <span x-show="!selectedPackage" class="text-red-500">*</span></label>
-                                <textarea name="keluhan" rows="3" :required="!selectedPackage" placeholder="Tuliskan keluhan motor Anda (Wajib jika tidak pilih paket)" class="w-full border-slate-200 rounded-xl px-4 py-3 bg-slate-50 text-blue-950 font-bold focus:ring-red-500 focus:border-red-500 placeholder-slate-400"></textarea>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Keluhan / Catatan <span x-show="selectedPackages.length === 0" class="text-red-500">*</span></label>
+                                <textarea name="keluhan" rows="3" :required="selectedPackages.length === 0" placeholder="Tuliskan keluhan motor Anda (Wajib jika tidak pilih paket)" class="w-full border-slate-200 rounded-xl px-4 py-3 bg-slate-50 text-blue-950 font-bold focus:ring-red-500 focus:border-red-500 placeholder-slate-400"></textarea>
                             </div>
 
                             <button type="submit" class="w-full px-6 py-4 bg-red-600 text-white rounded-xl text-sm font-black shadow-lg hover:bg-red-700 hover:shadow-xl hover:-translate-y-0.5 transition-all uppercase tracking-widest">

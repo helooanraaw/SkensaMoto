@@ -50,16 +50,55 @@ class UserController extends Controller
         return back()->with('success', 'Data kendaraan berhasil ditambahkan.');
     }
 
+    public function updateKendaraan(Request $request, Kendaraan $kendaraan)
+    {
+        if ($kendaraan->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $request->validate([
+            'plat_nomor' => 'required|string|unique:kendaraan,plat_nomor,' . $kendaraan->id,
+            'merk' => 'required|string',
+            'tipe' => 'required|string',
+            'tahun' => 'required|integer|min:1990|max:' . (date('Y') + 1),
+        ]);
+
+        $kendaraan->update([
+            'plat_nomor' => strtoupper($request->plat_nomor),
+            'merk' => $request->merk,
+            'tipe' => $request->tipe,
+            'tahun' => $request->tahun,
+        ]);
+
+        return back()->with('success', 'Data kendaraan berhasil diperbarui.');
+    }
+
+    public function destroyKendaraan(Kendaraan $kendaraan)
+    {
+        if ($kendaraan->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        // Check if there are ANY bookings associated with this vehicle
+        if ($kendaraan->bookings()->exists()) {
+            return back()->with('error', 'Tidak dapat menghapus kendaraan karena sudah memiliki riwayat servis atau antrean. Data ini diperlukan untuk laporan bengkel.');
+        }
+
+        $kendaraan->delete();
+        return back()->with('success', 'Data kendaraan berhasil dihapus.');
+    }
+
     public function storeBooking(Request $request)
     {
         $request->validate([
             'kendaraan_id' => 'required|exists:kendaraan,id',
             'tanggal' => 'required|date|after_or_equal:today',
-            'paket_id' => 'nullable|exists:paket_servis,id',
+            'paket_ids' => 'nullable|array',
+            'paket_ids.*' => 'exists:paket_servis,id',
             'keluhan' => 'nullable|string|max:1000',
         ]);
 
-        if (empty($request->paket_id) && empty($request->keluhan)) {
+        if (empty($request->paket_ids) && empty($request->keluhan)) {
             return back()->with('error', 'Silakan pilih paket servis atau isi keluhan Anda.');
         }
 
@@ -76,9 +115,9 @@ class UserController extends Controller
                 'status' => 'pending',
             ]);
 
-            if ($request->paket_id) {
-                // Attach paket to booking
-                $booking->paket_servis()->attach($request->paket_id);
+            if ($request->has('paket_ids') && is_array($request->paket_ids)) {
+                // Attach multiple packages to booking
+                $booking->paket_servis()->attach($request->paket_ids);
             }
 
             ProgresServis::create([
@@ -145,7 +184,7 @@ class UserController extends Controller
     public function history()
     {
         $bookings = Booking::where('user_id', auth()->id())
-            ->where('status', 'selesai')
+            ->where('status', 'completed')
             ->with(['kendaraan', 'paket_servis', 'mekanik'])
             ->orderBy('tanggal', 'desc')
             ->get();

@@ -90,17 +90,28 @@ class AdminController extends Controller
     {
         $request->validate([
             'estimasi_total_menit' => 'required|integer|min:1',
-            'id_jadwal' => 'required|exists:jadwal_harian,id'
         ]);
 
         try {
             DB::beginTransaction();
 
-            $jadwal = JadwalHarian::findOrFail($request->id_jadwal);
+            $jadwal = JadwalHarian::where('tanggal', $booking->tanggal)->first();
+            
+            if (!$jadwal) {
+                // Buat jadwal otomatis jika admin belum menset jadwal di tanggal tsb
+                $jadwal = JadwalHarian::create([
+                    'tanggal' => $booking->tanggal,
+                    'kapasitas_menit' => 480, // Default 8 jam
+                    'terpakai_menit' => 0,
+                    'jam_buka' => '08:00:00',
+                    'jam_tutup' => '16:00:00'
+                ]);
+            }
+
             $available_minutes = $jadwal->kapasitas_menit - $jadwal->terpakai_menit;
 
             if ($request->estimasi_total_menit > $available_minutes) {
-                return back()->with('error', 'Kapasitas jadwal tidak mencukupi untuk estimasi pengerjaan ini.');
+                return back()->with('error', 'Kapasitas jadwal di tanggal tersebut tidak mencukupi untuk estimasi pengerjaan ini.');
             }
 
             // Deduct capacity
@@ -131,8 +142,8 @@ class AdminController extends Controller
     // ALGORITHM 2: Auto-Deduct Inventory & Invoicing
     public function completeBooking(Request $request, Booking $booking)
     {
-        if ($booking->status !== 'in_progress' || $booking->quotation_status !== 'approved') {
-            return back()->with('error', 'Booking harus dalam status in_progress dan quotation disetujui.');
+        if ($booking->status !== 'in_progress') {
+            return back()->with('error', 'Booking harus dalam status in_progress.');
         }
 
         try {

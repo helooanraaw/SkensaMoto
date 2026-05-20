@@ -9,7 +9,7 @@
                 <h2 class="text-xl font-black text-blue-950">Pengaturan Jadwal & Kapasitas</h2>
                 <p class="text-sm text-slate-500 font-medium">Buka jadwal per hari dan tentukan kuota maksimal menit pengerjaan.</p>
             </div>
-            @if(in_array(auth()->user()->role, ['admin', 'guru']))
+            @if(in_array(auth()->user()->role, ['superadmin', 'admin']))
             <button @click="showCreateModal = true" class="px-5 py-2.5 bg-red-600 text-white rounded-full text-sm font-bold shadow-md hover:bg-red-700 hover:-translate-y-0.5 transition-all">
                 + Set Jadwal Baru
             </button>
@@ -57,7 +57,7 @@
                 
                 <div class="bg-slate-50 px-6 py-4 flex justify-between items-center border-t border-slate-100 mt-auto">
                     <span class="text-xs font-bold text-slate-500">ID: #{{ $sch->id }}</span>
-                    @if(in_array(auth()->user()->role, ['admin', 'guru']))
+                    @if(in_array(auth()->user()->role, ['superadmin', 'admin']))
                     <form action="{{ route('admin.schedules.destroy', $sch->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Menghapus jadwal bisa mempengaruhi booking yang sudah masuk pada tanggal ini. Lanjutkan?');">
                         @csrf
                         @method('DELETE')

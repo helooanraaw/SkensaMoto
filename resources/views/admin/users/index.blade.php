@@ -52,12 +52,14 @@
                             <td class="py-4 px-6">
                                 @php
                                     $roleColors = [
+                                        'superadmin' => 'bg-red-100 text-red-700',
                                         'admin' => 'bg-purple-100 text-purple-700',
                                         'guru' => 'bg-emerald-100 text-emerald-700',
                                         'mekanik' => 'bg-blue-100 text-blue-700',
                                         'user' => 'bg-slate-100 text-slate-700',
                                     ];
                                     $roleLabels = [
+                                        'superadmin' => 'Super Admin',
                                         'admin' => 'Admin',
                                         'guru' => 'Guru',
                                         'mekanik' => 'Mekanik',
@@ -78,6 +80,9 @@
                                             <option value="mekanik" {{ $user->role == 'mekanik' ? 'selected' : '' }}>Mekanik</option>
                                             <option value="guru" {{ $user->role == 'guru' ? 'selected' : '' }}>Guru</option>
                                             <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
+                                            @if(auth()->user()->role == 'superadmin')
+                                            <option value="superadmin" {{ $user->role == 'superadmin' ? 'selected' : '' }}>Super Admin</option>
+                                            @endif
                                         </select>
                                         <button type="submit" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Simpan Perubahan Role">
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>

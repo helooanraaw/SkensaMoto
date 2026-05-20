@@ -11,7 +11,7 @@
                         })->count();
         @endphp
 
-        @if(in_array($userRole, ['admin', 'guru']) && $adminPendingCount > 0)
+        @if(in_array($userRole, ['superadmin', 'admin']) && $adminPendingCount > 0)
         <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-r-[24px] shadow-sm flex items-center justify-between">
             <div>
                 <h3 class="text-lg font-black text-red-800">Menunggu Persetujuan Admin</h3>
@@ -55,7 +55,7 @@
             </div>
         </div>
 
-        @if(in_array($userRole, ['admin', 'guru']))
+        @if(in_array($userRole, ['superadmin', 'admin']))
         <!-- Charts Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Line Chart: Tren Booking -->
@@ -199,7 +199,7 @@
     </div>
 
     <x-slot name="scripts">
-        @if(in_array($userRole, ['admin', 'guru']))
+        @if(in_array($userRole, ['superadmin', 'admin']))
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 // Tren Booking Chart

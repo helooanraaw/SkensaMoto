@@ -1,10 +1,8 @@
 <x-sidebar-layout>
     <x-slot name="title">Pengaturan Profil</x-slot>
 
-    <div class="max-w-4xl mx-auto space-y-6">
-        <!-- Header -->
-        <div class="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm">
-            <h2 class="text-xl font-black text-blue-950">Pengaturan Profil</h2>
+    <div class="max-w-4xl space-y-6">
+        <div class="-mt-6 sm:-mt-6 mb-4">
             <p class="text-sm text-slate-500 font-medium">Kelola informasi pribadi dan keamanan akun Anda.</p>
         </div>
 
