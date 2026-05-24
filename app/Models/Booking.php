@@ -57,6 +57,7 @@ class Booking extends Model
 
     public function pemakaian_barang()
     {
-        return $this->belongsToMany(Inventory::class, 'pemakaian_barang', 'booking_id', 'barang_id')->withPivot('jumlah');
+        return $this->belongsToMany(Inventory::class, 'pemakaian_barang', 'booking_id', 'barang_id')
+            ->withPivot('id', 'jumlah', 'is_approved');
     }
 }

@@ -14,8 +14,7 @@
         body { font-family: 'Urbanist', sans-serif; }
         [x-cloak] { display: none !important; }
     </style>
-    <!-- Alpine.js is included via Laravel Breeze app.js, but let's ensure it's there -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
 </head>
 <body class="bg-slate-50 text-blue-950 antialiased selection:bg-red-100 selection:text-red-900" x-data="{ sidebarOpen: false }">
 

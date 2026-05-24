@@ -140,30 +140,50 @@ class UserController extends Controller
         }
 
         $request->validate([
+            'status' => 'required|in:approved,rejected',
             'approved_items' => 'array',
         ]);
 
+        $status = $request->input('status');
         $approvedIds = $request->approved_items ?? [];
 
-        // Set is_approved status for all items in this booking
-        $items = \DB::table('pemakaian_barang')->where('booking_id', $booking->id)->get();
-        
-        foreach ($items as $item) {
+        if ($status === 'rejected') {
+            // Set all items is_approved to false
             \DB::table('pemakaian_barang')
-                ->where('id', $item->id)
-                ->update(['is_approved' => in_array($item->id, $approvedIds)]);
+                ->where('booking_id', $booking->id)
+                ->update(['is_approved' => false]);
+
+            $booking->update([
+                'quotation_status' => 'rejected'
+            ]);
+
+            ProgresServis::create([
+                'booking_id' => $booking->id,
+                'status_log' => 'Pelanggan menolak estimasi biaya.'
+            ]);
+
+            return back()->with('success', 'Estimasi biaya berhasil ditolak.');
+        } else {
+            // Set is_approved status for all items in this booking
+            $items = \DB::table('pemakaian_barang')->where('booking_id', $booking->id)->get();
+            
+            foreach ($items as $item) {
+                \DB::table('pemakaian_barang')
+                    ->where('id', $item->id)
+                    ->update(['is_approved' => in_array($item->id, $approvedIds)]);
+            }
+
+            $booking->update([
+                'quotation_status' => 'approved'
+            ]);
+
+            ProgresServis::create([
+                'booking_id' => $booking->id,
+                'status_log' => 'Pelanggan telah menyetujui estimasi biaya dan sparepart.'
+            ]);
+
+            return back()->with('success', 'Persetujuan biaya berhasil dikirim ke bengkel.');
         }
-
-        $booking->update([
-            'quotation_status' => 'approved'
-        ]);
-
-        ProgresServis::create([
-            'booking_id' => $booking->id,
-            'status_log' => 'Pelanggan telah menyetujui estimasi biaya dan sparepart.'
-        ]);
-
-        return back()->with('success', 'Persetujuan biaya berhasil dikirim ke bengkel.');
     }
 
     public function downloadInvoice(\App\Models\Booking $booking)
@@ -184,8 +204,7 @@ class UserController extends Controller
     public function history()
     {
         $bookings = Booking::where('user_id', auth()->id())
-            ->where('status', 'completed')
-            ->with(['kendaraan', 'paket_servis', 'mekanik'])
+            ->with(['kendaraan', 'paket_servis', 'mekanik', 'progres', 'pemakaian_barang'])
             ->orderBy('tanggal', 'desc')
             ->get();
 
