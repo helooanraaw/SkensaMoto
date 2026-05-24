@@ -17,64 +17,69 @@
         .bg-honda-red { background-color: #E3000F; }
         .border-honda-red { border-color: #E3000F; }
         .hover-bg-honda-red-dark:hover { background-color: #cc000e; }
+
+        /* Custom Ultra Smooth Easing */
+        .nav-transition {
+            transition: all 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: max-width, width, background-color, border-radius, box-shadow, backdrop-filter, border-color;
+        }
     </style>
 </head>
 <body class="bg-white text-blue-950 antialiased selection:bg-red-100 selection:text-red-900">
 
     <!-- Navbar -->
-    <nav id="navbar" class="fixed w-full top-0 z-50 pt-4 pb-2 transition-all duration-500 ease-out group/nav transform origin-top border border-transparent [&.is-scrolled]:top-4 [&.is-scrolled]:w-[95%] [&.is-scrolled]:lg:w-[75%] [&.is-scrolled]:left-1/2 [&.is-scrolled]:-translate-x-1/2 [&.is-scrolled]:bg-white/85 [&.is-scrolled]:backdrop-blur-md [&.is-scrolled]:shadow-2xl [&.is-scrolled]:rounded-full [&.is-scrolled]:border-white/50 [&.is-scrolled]:pt-0 [&.is-scrolled]:pb-0 [&.is-scrolled]:scale-95">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20 px-2 lg:px-4">
-                <!-- Logo (Kiri) -->
-                <div class="flex items-center w-1/4">
-                    <!-- Logo -->
-                    <div class="flex-shrink-0 flex items-center gap-2">
-                        <img src="{{ asset('images/MotoSkensaLogo1.png') }}" alt="MotoSkensa Logo" class="h-10 w-auto drop-shadow-md group-[.is-scrolled]/nav:drop-shadow-none transition-all" />
-                        <div class="flex flex-col">
-                            <span class="font-extrabold text-2xl leading-tight tracking-tight text-blue-950 drop-shadow-md group-[.is-scrolled]/nav:drop-shadow-none transition-all">Skensa<span class="text-red-600">Moto</span></span>
+    <nav id="navbar" class="fixed w-full top-0 z-50 pt-8 group/nav nav-transition">
+        <div id="nav-container" class="w-full max-w-full mx-auto nav-transition group-[.is-scrolled]/nav:bg-white/95 group-[.is-scrolled]/nav:backdrop-blur-md group-[.is-scrolled]/nav:shadow-2xl group-[.is-scrolled]/nav:rounded-full group-[.is-scrolled]/nav:max-w-5xl  group-[.is-scrolled]/nav:border-white/50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-20 px-4 nav-transition">
+                    <!-- Logo (Kiri) -->
+                    <div class="flex items-center w-1/4">
+                        <!-- Logo -->
+                        <div class="flex-shrink-0 flex items-center gap-2">
+                            <img src="{{ asset('images/MotoSkensaLogo1.png') }}" alt="MotoSkensa Logo" class="h-10 w-auto drop-shadow-md nav-transition group-[.is-scrolled]/nav:drop-shadow-none" id="nav-logo" />
+                            <div class="flex flex-col">
+                                <span class="font-extrabold text-2xl leading-tight tracking-tight text-blue nav-transition group-[.is-scrolled]/nav:text-blue-950" id="nav-title">Skensa<span class="text-red-500 group-[.is-scrolled]/nav:text-red-600 nav-transition" id="nav-title-moto">Moto</span></span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Menu (Tengah) -->
-                <!-- Posisi dikembalikan ke tengah, warna disesuaikan 1 per 1 secara manual -->
-                <div class="hidden lg:flex items-center justify-center w-2/4">
-                    <div class="flex items-center gap-8 px-2 transition-all">
-                        <a href="#" class="text-blue-950 hover:text-red-600 font-bold transition-all group-[.is-scrolled]/nav:text-blue-950 group-[.is-scrolled]/nav:hover:text-red-600">Beranda</a>
-                        <a href="#services" class="text-blue-950 hover:text-red-600 font-bold transition-all group-[.is-scrolled]/nav:text-blue-950 group-[.is-scrolled]/nav:hover:text-red-600">Layanan Standar</a>
-                        <a href="#schedule" class="text-blue-950 hover:text-red-600 font-bold transition-all group-[.is-scrolled]/nav:text-blue-950 group-[.is-scrolled]/nav:hover:text-red-600">Jadwal Booking</a>
+                    
+                    <!-- Menu (Tengah) -->
+                    <div class="hidden lg:flex items-center justify-center w-2/4">
+                        <div class="flex items-center gap-8 px-2">
+                            <a href="#" class="nav-link text-blue/90 hover:text-white font-bold nav-transition group-[.is-scrolled]/nav:text-blue-950/80 group-[.is-scrolled]/nav:hover:text-red-600">Beranda</a>
+                            <a href="#services" class="nav-link text-blue/90 hover:text-white font-bold nav-transition group-[.is-scrolled]/nav:text-blue-950/80 group-[.is-scrolled]/nav:hover:text-red-600">Layanan Standar</a>
+                            <a href="#schedule" class="nav-link text-white/90 hover:text-white font-bold nav-transition group-[.is-scrolled]/nav:text-blue-950/80 group-[.is-scrolled]/nav:hover:text-red-600">Jadwal Booking</a>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Tombol (Kanan) -->
-                <div class="hidden lg:flex items-center justify-end w-1/4">
-                    <a href="/login" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-xl transition-all">Booking Antrian</a>
+                    <!-- Tombol (Kanan) -->
+                    <div class="hidden lg:flex items-center justify-end w-1/4">
+                        <a href="/login" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-xl nav-transition">Booking Antrian</a>
+                    </div>
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <div class="relative bg-white overflow-hidden">
+    <div class="relative bg-white overflow-hidden min-h-screen flex items-center">
         <!-- Full Bleed Image Background (Right 60%) -->
         <div class="absolute top-0 right-0 w-full lg:w-[55%] h-full z-0">
             <!-- Background Image -->
-            <img src="https://s0.bukalapak.com/bukalapak-kontenz-production/content_attachments/88030/original/bengkel_ahass_terdekat_main.jpg" alt="Motorcycle Workshop" class="absolute inset-0 w-full h-full object-cover object-center" />
+            <img src="{{ asset('images/LandingPageTSM.jpg') }}" alt="Motorcycle Workshop" class="absolute inset-0 w-full h-full object-cover object-center" />
             
-            <!-- Dark Overlay (Sedikit lebih gelap) -->
+            <!-- Dark Overlay -->
             <div class="absolute inset-0 bg-slate-950/10"></div>
             
-            <!-- Pelindung Teks Navbar (Agar menu putih di kanan tetap terbaca walau gambar terang) -->
-            <div class="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-slate-950/50 to-transparent"></div>
-            <!-- Gradient Fade-in dari Kiri (Membuat efek memudar menyentuh area tengah/50% layar) -->
+            <!-- Gradient Fade-in dari Kiri -->
             <div class="absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-white to-transparent"></div>
             
             <!-- Gradient Fade-in dari Bawah khusus mobile -->
             <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-white to-transparent lg:hidden"></div>
         </div>
 
-        <div class="max-w-7xl mx-auto relative z-10">
-            <div class="relative pb-16 pt-32 sm:pb-24 sm:pt-40 lg:pb-32 lg:pt-48 px-4 sm:px-6 lg:px-8 flex flex-col items-start min-h-[700px] justify-center">
+        <div class="max-w-7xl mx-auto relative z-10 w-full">
+            <div class="relative py-32 lg:py-48 px-4 sm:px-6 lg:px-8 flex flex-col items-start justify-center">
                 <div class="w-full lg:w-1/2 text-left">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-red-700 text-sm font-bold mb-6 border border-red-100 shadow-sm relative z-20">
                         <span class="flex h-2 w-2 rounded-full bg-red-600"></span>
@@ -333,8 +338,11 @@
 
     </div>
     
+    <script id="public-bookings-data" type="application/json">
+        @json($publicBookings)
+    </script>
     <script>
-        window.publicBookings = @json($publicBookings);
+        window.publicBookings = JSON.parse(document.getElementById('public-bookings-data').textContent);
     </script>
 
     <!-- Services Section -->
@@ -350,51 +358,72 @@
                 @forelse($packages as $paket)
                     @php
                         $isPopular = $paket->bookings_count > 0 && $paket->bookings_count >= $maxBookings;
+                        
+                        // Map image based on package name (Placeholder for now)
+                        $image = 'https://images.unsplash.com/photo-1558981403-c5f91dbcf9ad?q=80&w=800&auto=format&fit=crop'; // Default
+                        if (stripos($paket->nama_paket, 'oli') !== false) {
+                            $image = 'https://images.unsplash.com/photo-1610647752706-3bb12232b3ab?q=80&w=800&auto=format&fit=crop';
+                        } elseif (stripos($paket->nama_paket, 'lengkap') !== false || stripos($paket->nama_paket, 'berat') !== false) {
+                            $image = 'https://images.unsplash.com/photo-1599812411566-b939591992ec?q=80&w=800&auto=format&fit=crop';
+                        } elseif (stripos($paket->nama_paket, 'ringan') !== false || stripos($paket->nama_paket, 'reguler') !== false) {
+                            $image = 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=800&auto=format&fit=crop';
+                        }
                     @endphp
-                    <div class="bg-white border {{ $isPopular ? 'border-2 border-red-600 shadow-lg' : 'border-gray-200 hover:border-red-600 hover:shadow-lg' }} rounded-xl p-8 relative transition group">
-                        @if($isPopular)
-                            <div class="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg shadow-sm">Paling Sering Dipesan</div>
-                        @endif
+                    <div class="bg-white border {{ $isPopular ? 'border-red-600 ring-1 ring-red-600' : 'border-slate-200' }} rounded-xl overflow-hidden transition-all duration-300 group flex flex-col">
                         
-                        <div class="w-12 h-12 {{ $isPopular ? 'bg-red-600 text-white' : 'bg-red-100 text-red-600 group-hover:bg-red-600 group-hover:text-white' }} rounded-lg flex items-center justify-center mb-6 transition">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                        <!-- Image Area -->
+                        <div class="relative h-44 overflow-hidden bg-slate-100">
+                            <img src="{{ $paket->image_path ? asset($paket->image_path) : 'https://images.unsplash.com/photo-1558981403-c5f91dbcf9ad?q=80&w=800&auto=format&fit=crop' }}" 
+                                 alt="{{ $paket->nama_paket }}" 
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-blue-950/60 to-transparent"></div>
+                            @if($isPopular)
+                                <div class="absolute top-3 right-3 bg-red-600 text-white text-[9px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-wider">Terpopuler</div>
+                            @endif
+                            <div class="absolute bottom-3 left-4">
+                                <h3 class="text-lg font-extrabold text-white leading-tight">{{ $paket->nama_paket }}</h3>
+                            </div>
                         </div>
-                        
-                        <h3 class="text-lg font-bold text-blue-950 mb-2">{{ $paket->nama_paket }}</h3>
-                        <p class="text-blue-950 mb-6 text-sm leading-relaxed font-medium">{{ $paket->deskripsi ?? 'Pemeriksaan standar sesuai panduan mekanik.' }}</p>
-                        
-                        <div class="text-sm border-t border-gray-100 pt-4">
-                            @if($paket->harga_jasa == 0)
-                                <span class="font-bold text-emerald-600 flex items-center gap-1">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                    Gratis Biaya Jasa
-                                </span>
-                                <div class="text-xs text-slate-500 mt-1 font-medium">(Hanya membayar harga produk oli)</div>
-                            @else
-                                <span class="font-bold text-slate-500">Estimasi Jasa:</span> <span class="font-bold text-red-600">Mulai Rp {{ number_format($paket->harga_jasa, 0, ',', '.') }}</span>
-                            @endif
 
-                            @if(stripos($paket->nama_paket, 'oli') !== false)
-                                <div class="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs">
-                                    <p class="font-bold text-blue-950 mb-2 flex items-center gap-1">
-                                        <svg class="w-3.5 h-3.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                        Kisaran Harga Oli Orisinil:
-                                    </p>
-                                    <ul class="space-y-1.5 text-slate-600 font-medium">
-                                        <li class="flex justify-between"><span>Oli Mesin Matic</span> <span class="font-bold text-blue-950">Rp 45.000 - Rp 65.000</span></li>
-                                        <li class="flex justify-between"><span>Oli Mesin Bebek/Manual</span> <span class="font-bold text-blue-950">Rp 40.000 - Rp 55.000</span></li>
-                                        <li class="flex justify-between"><span>Oli Mesin Sport (1L)</span> <span class="font-bold text-blue-950">Rp 60.000 - Rp 85.000</span></li>
-                                        <li class="flex justify-between border-t border-slate-200/60 pt-1 mt-1"><span>Oli Transmisi/Gardan</span> <span class="font-bold text-blue-950">Rp 15.000 - Rp 20.000</span></li>
-                                    </ul>
-                                    <p class="text-[10px] text-slate-400 mt-2 italic">*Estimasi harga oli resmi AHM. Pilihan merk oli lain tersedia di bengkel.</p>
+                        <div class="p-6">
+                            <p class="text-[10px] font-black text-red-600 uppercase tracking-widest mb-3">SOP Bengkel Resmi</p>
+                            
+                            <p class="text-slate-600 text-xs leading-relaxed mb-6 font-medium">
+                                {{ $paket->deskripsi ?? 'Pemeriksaan menyeluruh sesuai standar industri untuk memastikan performa motor tetap prima.' }}
+                            </p>
+                            
+                            <div class="mt-auto pt-5 border-t border-slate-100 flex flex-col gap-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="flex flex-col">
+                                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                                            {{ $paket->tipe === 'jasa_saja' ? 'Harga Paket' : 'Biaya Jasa' }}
+                                        </span>
+                                        @if($paket->harga_jasa == 0)
+                                            <span class="text-base font-black text-emerald-600 uppercase">Gratis</span>
+                                        @else
+                                            <span class="text-lg font-black text-blue-950">Rp {{ number_format($paket->harga_jasa, 0, ',', '.') }}</span>
+                                        @endif
+                                    </div>
+                                    <div class="flex flex-col border-l border-slate-100 pl-4">
+                                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Material & Tambahan</span>
+                                        @if($paket->tipe === 'jasa_saja')
+                                            <span class="text-[10px] font-bold text-emerald-600 italic leading-tight">Sudah Termasuk</span>
+                                        @else
+                                            <span class="text-[10px] font-bold text-slate-600 italic leading-tight">Sesuai Kebutuhan</span>
+                                        @endif
+                                    </div>
                                 </div>
-                            @endif
+                                
+                                <a href="/login" class="block w-full text-center py-2.5 bg-blue-950 text-white group-hover:bg-red-600 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all">
+                                    Booking Sekarang
+                                </a>
+                            </div>
                         </div>
                     </div>
                 @empty
-                    <div class="col-span-3 text-center py-8 text-slate-500 font-medium">Belum ada paket servis yang tersedia.</div>
+                    <div class="col-span-3 py-16 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                        <p class="text-slate-400 font-bold italic">Belum ada paket servis tersedia.</p>
+                    </div>
                 @endforelse
             </div>
             
@@ -451,13 +480,21 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const navbar = document.getElementById('navbar');
-            window.addEventListener('scroll', () => {
+            const navContainer = document.getElementById('nav-container');
+            
+            const handleScroll = () => {
                 if (window.scrollY > 20) {
                     navbar.classList.add('is-scrolled');
+                    navContainer.classList.add('is-scrolled');
                 } else {
                     navbar.classList.remove('is-scrolled');
+                    navContainer.classList.remove('is-scrolled');
                 }
-            });
+            };
+
+            window.addEventListener('scroll', handleScroll);
+            // Run once on load
+            handleScroll();
         });
     </script>
 </body>

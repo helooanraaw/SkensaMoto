@@ -294,10 +294,19 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'nama_paket' => 'required|string|max:255',
+            'tipe' => 'required|in:jasa_saja,dengan_part',
             'deskripsi' => 'required|string',
             'estimasi_menit' => 'required|integer|min:1',
             'harga_jasa' => 'required|integer|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
+
+        if ($request->hasFile('image')) {
+            $imageName = time() . '_' . uniqid() . '.' . $request->image->extension();
+            $request->image->move(public_path('images/services'), $imageName);
+            $validated['image_path'] = 'images/services/' . $imageName;
+        }
+
         PaketServis::create($validated);
         return back()->with('success', 'Paket Servis berhasil ditambahkan.');
     }
@@ -306,10 +315,24 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'nama_paket' => 'required|string|max:255',
+            'tipe' => 'required|in:jasa_saja,dengan_part',
             'deskripsi' => 'required|string',
             'estimasi_menit' => 'required|integer|min:1',
             'harga_jasa' => 'required|integer|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
+
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($paketServis->image_path && file_exists(public_path($paketServis->image_path))) {
+                unlink(public_path($paketServis->image_path));
+            }
+
+            $imageName = time() . '_' . uniqid() . '.' . $request->image->extension();
+            $request->image->move(public_path('images/services'), $imageName);
+            $validated['image_path'] = 'images/services/' . $imageName;
+        }
+
         $paketServis->update($validated);
         return back()->with('success', 'Data Paket Servis berhasil diubah.');
     }

@@ -10,9 +10,11 @@ class PaketServis extends Model
 
     protected $fillable = [
         'nama_paket',
+        'tipe',
         'deskripsi',
         'estimasi_menit',
         'harga_jasa',
+        'image_path',
     ];
 
     public function barang()
