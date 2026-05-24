@@ -1,6 +1,6 @@
-# 🏍️ SkensaMotoHub - Teaching Factory (TEFA) Workshop ERP & Booking System
+# 🏍️ SkensaMoto - Skensa Motor Teaching Factory (TEFA) Workshop ERP & Booking System
 
-**SkensaMotoHub** adalah sistem Enterprise Resource Planning (ERP) dan manajemen booking servis motor yang dirancang khusus untuk bengkel Teaching Factory (TEFA) di lingkungan Sekolah Menengah Kejuruan (SMK). Aplikasi ini mengintegrasikan alur kerja mekanik sekolah, pengelolaan inventaris suku cadang, kapasitas harian bengkel, hingga manajemen pelanggan dalam satu sistem yang responsif dan modern.
+**SkensaMoto** adalah sistem Enterprise Resource Planning (ERP) dan manajemen booking servis motor yang dirancang khusus untuk bengkel Teaching Factory (TEFA) di lingkungan Sekolah Menengah Kejuruan (SMK). Aplikasi ini mengintegrasikan alur kerja mekanik sekolah, pengelolaan inventaris suku cadang, kapasitas harian bengkel, hingga manajemen pelanggan dalam satu sistem yang responsif dan modern.
 
 ---
 
