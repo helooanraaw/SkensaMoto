@@ -1,58 +1,127 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🏍️ SkensaMotoHub - Teaching Factory (TEFA) Workshop ERP & Booking System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**SkensaMotoHub** adalah sistem Enterprise Resource Planning (ERP) dan manajemen booking servis motor yang dirancang khusus untuk bengkel Teaching Factory (TEFA) di lingkungan Sekolah Menengah Kejuruan (SMK). Aplikasi ini mengintegrasikan alur kerja mekanik sekolah, pengelolaan inventaris suku cadang, kapasitas harian bengkel, hingga manajemen pelanggan dalam satu sistem yang responsif dan modern.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🛠️ Teknologi & Tools yang Digunakan
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Projek ini dibangun menggunakan teknologi modern untuk menjamin performa, keamanan, dan skalabilitas:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+*   **Backend & Framework**: PHP 8.2+ & **Laravel 11.x**
+*   **Database**: **PostgreSQL** (di-host menggunakan **Supabase** untuk kemudahan skalabilitas)
+*   **API Authentication**: **Laravel Sanctum** (digunakan untuk integrasi aman dengan aplikasi Mobile/External)
+*   **Frontend**: 
+    *   **Laravel Blade** & **Alpine.js** untuk interaktivitas komponen.
+    *   **Tailwind CSS v3** dengan tema kustom gelap (*Custom Dark Theme*) untuk UI yang premium dan modern.
+*   **Asset & Ikon**: SVG Heroicons (bebas dari penggunaan emoji di dalam antarmuka aplikasi untuk menjaga estetika profesional).
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🌟 Fitur Utama
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Sistem ini mendukung pengelolaan multi-pengguna dengan hak akses yang terperinci:
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+### 1. Sistem Multi-Role (Akses Bertingkat)
+*   **Superadmin**: Hak akses penuh termasuk manajemen pengguna, pengaturan tarif bengkel, inventaris, dan konfigurasi sistem.
+*   **Admin**: Mengelola jadwal harian, menyetujui/menolak booking, dan memperbarui inventaris barang.
+*   **Mekanik**: Memulai pengerjaan servis, menginput kebutuhan suku cadang (*Quotation*), dan menyelesaikan proses servis.
+*   **User/Pelanggan**: Mendaftarkan kendaraan, melakukan booking online, memantau progres servis secara real-time, menyetujui estimasi biaya, dan mengunduh invoice.
 
-## Agentic Development
+### 2. Fitur Kendaraan & Booking Pintar
+*   **Manajemen Kendaraan**: User dapat mendaftarkan beberapa kendaraan miliknya (menyimpan Plat Nomor, Merk, Tipe, dan Tahun).
+*   **Smart Slot Booking**: Sistem menghitung kapasitas sisa bengkel berdasarkan menit kerja harian (`jadwal_harian`). Pendaftaran booking baru akan dibatasi jika kapasitas hari itu telah penuh.
+*   **Real-time Progress Tracker**: User dapat memantau status pengerjaan motornya (`pending` $\rightarrow$ `approved` $\rightarrow$ `in_progress` $\rightarrow$ `completed` / `rejected`).
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### 3. Inventory & Sistem Invoice Otomatis
+*   **Manajemen Stok**: Stok suku cadang di inventaris bengkel akan otomatis terpotong saat mekanik menyelesaikan servis.
+*   **Auto-Invoicing**: Sistem otomatis menghitung total biaya servis berdasarkan harga jasa paket yang diambil dan total harga suku cadang yang digunakan.
 
-```bash
-composer require laravel/boost --dev
+---
 
-php artisan boost:install
-```
+## ⚙️ Panduan Instalasi & Menjalankan Projek
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Ikuti langkah-langkah berikut untuk menjalankan projek di komputer lokal Anda:
 
-## Contributing
+### Prasyarat (Prerequisites)
+Pastikan Anda sudah menginstal program berikut di komputer Anda:
+*   [PHP (versi 8.2 ke atas)](https://www.php.net/downloads)
+*   [Composer](https://getcomposer.org/download/)
+*   [Node.js & NPM](https://nodejs.org/en/download)
+*   Database PostgreSQL (atau PostgreSQL via Supabase)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Langkah-Langkah
 
-## Code of Conduct
+1.  **Clone Repository**
+    ```bash
+    git clone <url-repository-anda>
+    cd MotoSkensa
+    ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+2.  **Install Dependensi (PHP & Node.js)**
+    ```bash
+    composer install
+    npm install
+    ```
 
-## Security Vulnerabilities
+3.  **Salin File Environment**
+    Salin file `.env.example` menjadi `.env`:
+    ```bash
+    cp .env.example .env
+    ```
+    Buka file `.env` dan sesuaikan koneksi database Anda (misalnya ke Supabase PostgreSQL):
+    ```env
+    DB_CONNECTION=pgsql
+    DB_HOST=your-supabase-db-host
+    DB_PORT=5432
+    DB_DATABASE=your-database-name
+    DB_USERNAME=postgres
+    DB_PASSWORD=your-database-password
+    ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+4.  **Generate Application Key**
+    ```bash
+    php artisan key:generate
+    ```
 
-## License
+5.  **Jalankan Migrasi Database beserta Seeders**
+    Langkah ini akan membuat tabel-tabel yang dibutuhkan sekaligus mengisi data awal (seperti data admin default, paket servis, dan stok inventaris):
+    ```bash
+    php artisan migrate --seed
+    ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+6.  **Jalankan Server Lokal**
+    Jalankan kedua terminal perintah berikut secara bersamaan:
+    *   **Terminal 1 (Laravel Server)**:
+        ```bash
+        php artisan serve
+        ```
+    *   **Terminal 2 (Vite Server untuk CSS & Assets)**:
+        ```bash
+        npm run dev
+        ```
+
+7.  Akses aplikasi di browser Anda melalui alamat: **`http://localhost:8000`**
+
+---
+
+## 🛜 Panduan Penggunaan API (Menggunakan Postman)
+
+Projek ini dilengkapi dengan endpoint API terproteksi untuk integrasi aplikasi mobile.
+
+### Alur Autentikasi API:
+1.  **Register/Login**: Panggil endpoint `POST /api/register` atau `POST /api/login` untuk mendapatkan token akses.
+2.  **Set Authorization**: Salin token yang Anda dapatkan, lalu masukkan ke dalam header **Postman** Anda:
+    *   Pilih tab **Authorization**.
+    *   Pilih Type: **Bearer Token**.
+    *   Tempel token Anda di sana.
+3.  **Set Accept Header**: Pastikan di tab Headers, tambahkan key `Accept` dengan value `application/json`.
+
+### Contoh Endpoint yang Tersedia:
+*   **Registrasi**: `POST /api/register`
+*   **Login**: `POST /api/login`
+*   **Daftar Kendaraan**: `GET /api/kendaraan` (Mengambil semua kendaraan milik user)
+*   **Tambah Kendaraan**: `POST /api/kendaraan` (Mengirim body json: `plat_nomor`, `merk`, `tipe`, `tahun`)
+*   **Hapus Kendaraan**: `DELETE /api/kendaraan/{id}` (Menghapus kendaraan berdasarkan ID)
+*   **Daftar Booking**: `GET /api/bookings`
+*   **Buat Booking**: `POST /api/bookings`
