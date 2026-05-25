@@ -35,7 +35,7 @@
             box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1) !important;
             border-radius: 9999px !important;
             max-width: 64rem !important; /* max-w-5xl */
-            border: 1px solid rgba(226, 232, 240, 0.8) !important; /* border-slate-200/80 */
+            border: none !important;
         }
         #navbar.is-scrolled #nav-logo {
             filter: drop-shadow(0 0 0 transparent) !important;
@@ -49,7 +49,7 @@
 
     <!-- Navbar -->
     <nav id="navbar" class="fixed w-full top-0 z-50 pt-8 group nav-transition">
-        <div id="nav-container" class="w-full max-w-full mx-auto nav-transition group-[.is-scrolled]:bg-white/95 group-[.is-scrolled]:backdrop-blur-md group-[.is-scrolled]:shadow-2xl group-[.is-scrolled]:rounded-full group-[.is-scrolled]:max-w-5xl group-[.is-scrolled]:border group-[.is-scrolled]:border-white/50">
+        <div id="nav-container" class="w-full max-w-full mx-auto nav-transition group-[.is-scrolled]:bg-white/95 group-[.is-scrolled]:backdrop-blur-md group-[.is-scrolled]:shadow-2xl group-[.is-scrolled]:rounded-full group-[.is-scrolled]:max-w-5xl">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-20 px-4 nav-transition">
                     <!-- Logo (Kiri) -->
@@ -68,7 +68,7 @@
                         <div class="flex items-center gap-8 px-2">
                             <a href="#" class="nav-link text-blue-950/80 hover:text-red-600 font-bold nav-transition group-[.is-scrolled]:text-blue-950/80 group-[.is-scrolled]:hover:text-red-600">Beranda</a>
                             <a href="#services" class="nav-link text-blue-950/80 hover:text-red-600 font-bold nav-transition group-[.is-scrolled]:text-blue-950/80 group-[.is-scrolled]:hover:text-red-600">Layanan Standar</a>
-                            <a href="#schedule" class="nav-link text-blue-950/80 hover:text-red-600 font-bold nav-transition group-[.is-scrolled]:text-blue-950/80 group-[.is-scrolled]:hover:text-red-600">Jadwal Booking</a>
+                            <a href="#schedule" class="nav-link text-white/80 hover:text-red-600 font-bold nav-transition group-[.is-scrolled]:text-blue-950/80 group-[.is-scrolled]:hover:text-red-600">Jadwal Booking</a>
                         </div>
                     </div>
 
@@ -519,5 +519,3 @@
     </script>
 </body>
 </html>
-
-
