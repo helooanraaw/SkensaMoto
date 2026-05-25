@@ -12,12 +12,12 @@
             line-height: 1.5;
             font-size: 12px;
             margin: 0;
-            padding: 30px;
+            padding: 20px 30px;
         }
         .header {
             border-bottom: 3px solid #dc2626;
-            padding-bottom: 25px;
-            margin-bottom: 25px;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
         }
         .header table {
             width: 100%;
@@ -37,10 +37,10 @@
         
         .info-table {
             width: 100%;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
         }
         .info-table td {
-            padding: 8px 0;
+            padding: 5px 0;
             vertical-align: top;
         }
         .info-label {
@@ -54,20 +54,20 @@
         .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
         }
         .items-table th {
             background-color: #f8fafc;
             color: #475569;
             font-weight: bold;
             text-align: left;
-            padding: 12px 10px;
+            padding: 10px 10px;
             border-bottom: 2px solid #e2e8f0;
             font-size: 11px;
             text-transform: uppercase;
         }
         .items-table td {
-            padding: 10px;
+            padding: 8px 10px;
             border-bottom: 1px solid #f1f5f9;
         }
         .text-right { text-align: right; }
@@ -76,7 +76,7 @@
         .total-row td {
             font-weight: bold;
             font-size: 13px;
-            padding: 10px;
+            padding: 8px 10px;
             background-color: #ffffff;
         }
         .grand-total td {
@@ -85,16 +85,20 @@
             background-color: #f1f5f9;
             color: #172554;
             border-top: 2px solid #172554;
-            padding: 12px 10px;
+            padding: 10px 10px;
         }
         
         .footer {
-            margin-top: 40px;
+            margin-top: 20px;
             text-align: center;
             font-size: 11px;
             color: #94a3b8;
             border-top: 1px solid #f1f5f9;
-            padding-top: 30px;
+            padding-top: 15px;
+        }
+
+        tr {
+            page-break-inside: avoid;
         }
     </style>
 </head>
@@ -113,12 +117,12 @@
                         @endif
                     </span>
                     <div style="margin-top: 5px; color: #64748b; font-size: 11px;">
-                        {{ $appSetting->alamat ?? 'Jl. Contoh Alamat Bengkel No. 123, Kota' }}<br>
-                        Telp: {{ $appSetting->telepon ?? '08123456789' }}
+                        {{ $appSetting->alamat ?? 'Jl. HOS. Cokroaminoto No. 84 Denpasar, Bali 80118' }}<br>
+                        Telp: {{ $appSetting->telepon ?? '081236396662' }}
                     </div>
                 </td>
                 <td class="text-right">
-                    <h2 style="margin: 0; color: #1e293b; font-size: 28px;">INVOICE</h2>
+                    <h2 style="margin: 0; color: #1e293b; font-size: 28px;">NOTA SERVIS</h2>
                     <p style="margin: 5px 0 0 0; font-weight: bold; color: #dc2626;">#{{ $booking->nomor_invoice }}</p>
                     <p style="margin: 5px 0 0 0; color: #64748b;">Tanggal: {{ \Carbon\Carbon::parse($booking->tanggal)->format('d F Y') }}</p>
                 </td>
@@ -157,7 +161,7 @@
         </tr>
     </table>
 
-    <div style="margin-bottom: 20px;">
+    <div style="margin-bottom: 15px;">
         <strong>Keluhan:</strong> {{ $booking->keluhan ?: '-' }}
     </div>
 
@@ -236,21 +240,6 @@
                 <td class="text-right">Rp {{ number_format($totalJasa + $totalSparepart, 0, ',', '.') }}</td>
             </tr>
         </tbody>
-    </table>
-
-    <table style="width: 100%; margin-top: 30px;">
-        <!-- <tr>
-            <td width="50%" class="text-center">
-                <p>Hormat Kami,</p>
-                <br><br><br>
-                <p><strong>{{ $appSetting->nama_bengkel ?? 'MotoSkensa' }}</strong></p>
-            </td>
-            <td width="50%" class="text-center">
-                <p>Pelanggan,</p>
-                <br><br><br>
-                <p><strong>{{ $booking->user->name }}</strong></p>
-            </td>
-        </tr> -->
     </table>
 
     <div class="footer">

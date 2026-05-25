@@ -309,7 +309,7 @@
                             
                             <template x-if="activeBooking?.nomor_invoice">
                                 <div class="mt-3 pt-3 border-t border-slate-200">
-                                    <p class="text-xs font-bold text-slate-400 uppercase">Nomor Invoice</p>
+                                    <p class="text-xs font-bold text-slate-400 uppercase">Nomor</p>
                                     <p class="text-sm font-black text-indigo-600" x-text="activeBooking?.nomor_invoice"></p>
                                 </div>
                             </template>

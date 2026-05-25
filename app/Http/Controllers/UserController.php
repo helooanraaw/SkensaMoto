@@ -13,56 +13,81 @@ use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
+    // Fungsi buat nampilin halaman dashboard pas pelanggan (user) login
     public function dashboard()
     {
+        // Ambil data siapa yang lagi login sekarang
         $user = Auth::user();
-        $kendaraan = Kendaraan::where('user_id', $user->id)->get();
         
+        // Ambil daftar motor milik user ini beserta total booking yang terikat
+        $kendaraan = Kendaraan::where('user_id', $user->id)->withCount('bookings')->get();
+        
+        // Ambil riwayat order servis (booking) milik user ini dari yang paling baru
+        // Kita juga narik data relasinya (motor, mekanik, paket, dsb) sekalian biar gampang nampilinnya
         $bookings = Booking::with(['kendaraan', 'jadwal', 'progres', 'paket_servis', 'pemakaian_barang', 'mekanik'])
             ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->get();
 
+        // Ambil jadwal bengkel mulai dari hari ini ke depan (buat form booking baru)
         $activeSchedules = JadwalHarian::where('tanggal', '>=', now()->toDateString())
             ->orderBy('tanggal', 'asc')
             ->get();
 
+        // Kirim semua datanya ke file tampilan (blade)
         return view('user.dashboard', compact('kendaraan', 'bookings', 'activeSchedules'));
     }
 
+    // Fungsi buat user nambahin data motornya ke sistem
     public function storeKendaraan(Request $request)
     {
+        // Validasi inputan biar gak ngasal
         $request->validate([
-            'plat_nomor' => 'required|string|unique:kendaraan,plat_nomor',
+            'plat_nomor' => 'required|string|unique:kendaraan,plat_nomor', // Plat gak boleh sama sama yg udah ada
             'merk' => 'required|string',
             'tipe' => 'required|string',
-            'tahun' => 'required|integer|min:1990|max:' . (date('Y') + 1),
+            'tahun' => 'required|integer|min:1990|max:' . (date('Y') + 1), // Minimal tahun 1990
         ]);
 
+        // Simpan kendaraan dan kaitin sama ID user yang login
         Kendaraan::create([
             'user_id' => Auth::id(),
-            'plat_nomor' => strtoupper($request->plat_nomor),
+            'plat_nomor' => strtoupper($request->plat_nomor), // Plat dibikin huruf besar semua otomatis
             'merk' => $request->merk,
             'tipe' => $request->tipe,
             'tahun' => $request->tahun,
         ]);
 
-        return back()->with('success', 'Data kendaraan berhasil ditambahkan.');
+        return back()->with('success', 'Data motor berhasil ditambahkan.');
     }
 
+    // Fungsi buat ngubah data motor
     public function updateKendaraan(Request $request, Kendaraan $kendaraan)
     {
+        // Keamanan: Cek beneran gak ini motor milik orang yang lagi login?
         if ($kendaraan->user_id !== Auth::id()) {
-            abort(403);
+            abort(403); // Kalau beda orang, lempar error forbidden
         }
 
-        $request->validate([
-            'plat_nomor' => 'required|string|unique:kendaraan,plat_nomor,' . $kendaraan->id,
+        // Cari tahu apakah motor ini sudah punya riwayat booking/transaksi
+        $hasBookings = $kendaraan->bookings()->exists();
+
+        $rules = [
             'merk' => 'required|string',
             'tipe' => 'required|string',
             'tahun' => 'required|integer|min:1990|max:' . (date('Y') + 1),
-        ]);
+        ];
 
+        // Pengaman histori: Kalau sudah ada transaksi/booking, plat nomor tidak boleh diganti
+        if ($hasBookings) {
+            $request->merge(['plat_nomor' => $kendaraan->plat_nomor]);
+        } else {
+            $rules['plat_nomor'] = 'required|string|unique:kendaraan,plat_nomor,' . $kendaraan->id;
+        }
+
+        $request->validate($rules);
+
+        // Update datanya
         $kendaraan->update([
             'plat_nomor' => strtoupper($request->plat_nomor),
             'merk' => $request->merk,
@@ -70,93 +95,107 @@ class UserController extends Controller
             'tahun' => $request->tahun,
         ]);
 
-        return back()->with('success', 'Data kendaraan berhasil diperbarui.');
+        return back()->with('success', 'Data motor berhasil diperbarui.');
     }
 
+    // Fungsi buat ngapus data motor
     public function destroyKendaraan(Kendaraan $kendaraan)
     {
+        // Pengecekan keamanan lagi
         if ($kendaraan->user_id !== Auth::id()) {
             abort(403);
         }
 
-        // Check if there are ANY bookings associated with this vehicle
+        // Kalo motor ini udah pernah diservis/dibooking, gak boleh dihapus, soalnya datanya dipake buat laporan bengkel
         if ($kendaraan->bookings()->exists()) {
-            return back()->with('error', 'Tidak dapat menghapus kendaraan karena sudah memiliki riwayat servis atau antrean. Data ini diperlukan untuk laporan bengkel.');
+            return back()->with('error', 'Tidak dapat menghapus motor ini karena sudah memiliki riwayat servis atau antrean.');
         }
 
+        // Kalau aman (belum pernah dibooking), baru boleh dihapus
         $kendaraan->delete();
-        return back()->with('success', 'Data kendaraan berhasil dihapus.');
+        return back()->with('success', 'Data motor berhasil dihapus.');
     }
 
+    // Fungsi pas user nge-submit form buat daftar antrean/booking
     public function storeBooking(Request $request)
     {
+        // Pastiin data yang di-submit bener (ada ID kendaraan, ada tanggal, dsb)
         $request->validate([
             'kendaraan_id' => 'required|exists:kendaraan,id',
-            'tanggal' => 'required|date|after_or_equal:today',
+            'tanggal' => 'required|date|after_or_equal:today', // Gak boleh booking buat masa lalu
             'paket_ids' => 'nullable|array',
             'paket_ids.*' => 'exists:paket_servis,id',
             'keluhan' => 'nullable|string|max:1000',
         ]);
 
+        // Paling gak, user harus milih paket servis ATAU ngisi keluhan. Kalau kosong dua-duanya tolak.
         if (empty($request->paket_ids) && empty($request->keluhan)) {
             return back()->with('error', 'Silakan pilih paket servis atau isi keluhan Anda.');
         }
 
-        // Cek kendaraan milik user
+        // Keamanan: Pastiin kendaraan yang dipilih emang bener-bener milik user ini
         $kendaraan = Kendaraan::where('id', $request->kendaraan_id)->where('user_id', Auth::id())->firstOrFail();
 
-        DB::beginTransaction();
+        DB::beginTransaction(); // Buka transaksi database
         try {
+            // Bikin record/data booking baru di database
             $booking = Booking::create([
                 'user_id' => Auth::id(),
                 'kendaraan_id' => $kendaraan->id,
                 'tanggal' => $request->tanggal,
                 'keluhan' => $request->keluhan ?? '-',
-                'status' => 'pending',
+                'status' => 'pending', // Status awalnya 'pending' (nunggu di-acc admin)
             ]);
 
+            // Kalau user milih paket-paket tertentu, kita kaitin paketnya sama booking ini
             if ($request->has('paket_ids') && is_array($request->paket_ids)) {
-                // Attach multiple packages to booking
                 $booking->paket_servis()->attach($request->paket_ids);
             }
 
+            // Catat history booking pertamanya
             ProgresServis::create([
                 'booking_id' => $booking->id,
                 'status_log' => 'Booking dibuat, menunggu persetujuan admin.',
             ]);
 
-            DB::commit();
+            DB::commit(); // Kalo gak ada error, simpan permanen
             return back()->with('success', 'Booking berhasil dibuat. Silakan tunggu konfirmasi.');
         } catch (\Exception $e) {
-            DB::rollBack();
+            DB::rollBack(); // Kalau gagal/error di tengah proses, batalin semua biar gak ada data setengah matang
             return back()->with('error', 'Terjadi kesalahan saat membuat booking.');
         }
     }
 
+    // Fungsi pas user nyetujuin atau nolak estimasi biaya yang dikirim dari mekanik/admin
     public function approveQuotation(Request $request, Booking $booking)
     {
+        // Pengecekan biar user lain gak ngasal nyetujuin booking orang
         if ($booking->user_id !== Auth::id()) {
             abort(403);
         }
 
+        // Pastiin pilihan statusnya antara 'approved' atau 'rejected'
         $request->validate([
             'status' => 'required|in:approved,rejected',
-            'approved_items' => 'array',
+            'approved_items' => 'array', // Ini list barang (sparepart) mana aja yang disetujui sama user
         ]);
 
         $status = $request->input('status');
         $approvedIds = $request->approved_items ?? [];
 
+        // Kalau user nolak estimasi biayanya
         if ($status === 'rejected') {
-            // Set all items is_approved to false
+            // Bikin semua status persetujuan barang di database jadi false (gak disetujuin)
             \DB::table('pemakaian_barang')
                 ->where('booking_id', $booking->id)
                 ->update(['is_approved' => false]);
 
+            // Ubah status quotation jadi ditolak
             $booking->update([
                 'quotation_status' => 'rejected'
             ]);
 
+            // Catat log
             ProgresServis::create([
                 'booking_id' => $booking->id,
                 'status_log' => 'Pelanggan menolak estimasi biaya.'
@@ -164,19 +203,22 @@ class UserController extends Controller
 
             return back()->with('success', 'Estimasi biaya berhasil ditolak.');
         } else {
-            // Set is_approved status for all items in this booking
+            // Kalau user setuju, kita cocokin mana barang yang dicentang setuju
             $items = \DB::table('pemakaian_barang')->where('booking_id', $booking->id)->get();
             
             foreach ($items as $item) {
+                // Kalo ID barangnya ada di array checklist dari user, jadikan true, sisanya false
                 \DB::table('pemakaian_barang')
                     ->where('id', $item->id)
                     ->update(['is_approved' => in_array($item->id, $approvedIds)]);
             }
 
+            // Ubah status jadi disetujui
             $booking->update([
                 'quotation_status' => 'approved'
             ]);
 
+            // Catat log progres
             ProgresServis::create([
                 'booking_id' => $booking->id,
                 'status_log' => 'Pelanggan telah menyetujui estimasi biaya dan sparepart.'
@@ -186,45 +228,56 @@ class UserController extends Controller
         }
     }
 
+    // Fungsi buat download file struk / invoice format PDF pas servis udah kelar
     public function downloadInvoice(\App\Models\Booking $booking)
     {
-        // Pastikan hanya pemilik yang bisa mendownload
+        // Keamanan: Cuma pemilik booking yang boleh narik PDF-nya
         if ($booking->user_id !== auth()->id()) {
             abort(403, 'Akses ditolak.');
         }
 
+        // Tarik data lengkapnya
         $booking->load(['kendaraan', 'jadwal', 'mekanik', 'pemakaian_barang', 'paket_servis']);
+        // Tarik setting (nama bengkel dsb buat kop surat di PDF)
         $appSetting = \App\Models\Setting::first();
 
+        // Nyiapin nama file pas di-download, misal "Invoice_MotoSkensa_INV-2026-0001.pdf"
         $filename = 'Invoice_MotoSkensa_' . str_replace(['/', '\\'], '-', $booking->nomor_invoice) . '.pdf';
+        
+        // Render dari file view 'pdf.invoice' pake library DomPDF
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.invoice', compact('booking', 'appSetting'));
-        return $pdf->download($filename);
+        return $pdf->download($filename); // Lempar file ke user buat disedot
     }
 
+    // Nampilin halaman riwayat semua servis yang pernah dilakukan
     public function history()
     {
+        // Narik semua data booking milik user ini
         $bookings = Booking::where('user_id', auth()->id())
             ->with(['kendaraan', 'paket_servis', 'mekanik', 'progres', 'pemakaian_barang'])
-            ->orderBy('tanggal', 'desc')
+            ->orderBy('tanggal', 'desc') // Paling baru ada di atas
             ->get();
 
         return view('user.history', compact('bookings'));
     }
 
+    // Nampilin form kelola profil akun (nama, email, password)
     public function settings()
     {
         return view('user.settings', ['user' => Auth::user()]);
     }
 
+    // Proses update profilnya
     public function updateSettings(Request $request)
     {
         $user = Auth::user();
 
+        // Validasi, cek format email dan pastiin email belom dipake orang lain (kecuali email dia sendiri yg lama)
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'nomor_telepon' => 'nullable|string|max:20',
-            'password' => 'nullable|string|min:8|confirmed',
+            'password' => 'nullable|string|min:8|confirmed', // Kalau mau ganti password, harus sesuai ketikan "confirm password"
         ]);
 
         $data = [
@@ -233,15 +286,18 @@ class UserController extends Controller
             'nomor_telepon' => $request->nomor_telepon,
         ];
 
+        // Kalau form password diisi, enkripsi passwordnya (di-hash) lalu masukin ke data yang mau di-update
         if ($request->filled('password')) {
             $data['password'] = \Illuminate\Support\Facades\Hash::make($request->password);
         }
 
+        // Save ke database
         $user->update($data);
 
         return back()->with('success', 'Profil berhasil diperbarui.');
     }
 
+    // Ini cuma buat nyediain data paket servis ke JavaScript pas user pilih paket di modal booking (format JSON)
     public function getPackages()
     {
         $packages = PaketServis::orderBy('harga_jasa', 'asc')->get();

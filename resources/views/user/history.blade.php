@@ -1,25 +1,7 @@
 <x-sidebar-layout>
     <!-- <x-slot name="title">Riwayat Servis</x-slot> -->
 
-    <div x-data="{ 
-            showModal: false, 
-            activeBooking: null,
-            activeTab: 'all',
-            bookings: @js($bookings),
-            get activeCount() {
-                return this.bookings.filter(b => ['pending', 'approved', 'in_progress'].includes(b.status)).length;
-            },
-            get completedCount() {
-                return this.bookings.filter(b => b.status === 'completed').length;
-            },
-            get rejectedCount() {
-                return this.bookings.filter(b => b.status === 'rejected').length;
-            },
-            openModal(b) {
-                this.activeBooking = b;
-                this.showModal = true;
-            }
-        }" class="space-y-8">
+    <div x-data="historyManager(@js($bookings))" x-effect="document.body.style.overflow = showModal ? 'hidden' : ''" class="space-y-8">
         
         <div class="-mt-6 sm:-mt-10 mb-2">
             <p class="text-slate-500 font-medium">Catatan medis perawatan motor Anda di MotoSkensa.</p>
@@ -129,7 +111,7 @@
                             </div>
                             @if($booking->nomor_invoice)
                             <div class="text-left sm:text-right w-full sm:w-auto bg-slate-50 sm:bg-transparent p-4 sm:p-0 rounded-xl">
-                                <div class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Nomor Invoice</div>
+                                <div class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Nomor</div>
                                 <div class="font-mono font-bold text-blue-950 text-lg">{{ $booking->nomor_invoice }}</div>
                             </div>
                             @endif
@@ -172,10 +154,14 @@
                                     </div>
                                     <div class="flex justify-between items-center pt-4 mt-4 border-t border-slate-200">
                                         <span class="font-black text-blue-950">
-                                            @if($booking->status === 'completed') TOTAL BIAYA @else ESTIMASI JASA @endif
+                                            @if($booking->status === 'completed') TOTAL BIAYA @else ESTIMASI BIAYA @endif
                                         </span>
                                         <span class="text-2xl font-black text-red-600">
-                                            Rp @if($booking->status === 'completed') {{ number_format($booking->total_harga, 0, ',', '.') }} @else {{ number_format($booking->paket_servis->sum('harga_jasa'), 0, ',', '.') }} @endif
+                                            Rp @if($booking->status === 'completed') 
+                                                {{ number_format($booking->total_harga, 0, ',', '.') }} 
+                                            @else 
+                                                {{ number_format($booking->paket_servis->sum('harga_jasa') + $booking->pemakaian_barang->sum(function($item) { return $item->pivot->is_approved ? ($item->harga_satuan * $item->pivot->jumlah) : 0; }), 0, ',', '.') }} 
+                                            @endif
                                         </span>
                                     </div>
                                 </div>
@@ -192,7 +178,7 @@
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                Cetak Invoice
+                                Cetak Nota
                             </a>
                             @endif
                         </div>
@@ -202,130 +188,189 @@
         @endif
 
         <!-- PROGRESS MODAL (Reuse from Dashboard) -->
-        <div x-cloak x-show="showModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
-            <div @click.away="showModal = false" class="bg-white rounded-[24px] shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] my-8">
-                <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
-                    <div>
-                        <h3 class="text-lg font-black text-blue-950">Detail Servis <span x-text="'#' + activeBooking?.id"></span></h3>
-                        <p class="text-xs text-slate-500 font-medium">Plat Nomor: <span class="font-bold text-slate-700" x-text="activeBooking?.kendaraan?.plat_nomor"></span></p>
-                    </div>
-                    <button @click="showModal = false" class="text-slate-400 hover:text-red-500 bg-white rounded-full p-2 shadow-sm border border-slate-100">&times;</button>
-                </div>
-                
-                <div class="p-6 overflow-y-auto flex-1 space-y-6">
-                    <!-- Dynamic Status Banner -->
-                    <div class="rounded-[16px] p-4 text-center font-bold text-sm uppercase tracking-widest border"
-                         :class="{
-                             'bg-orange-50 text-orange-700 border-orange-100': activeBooking?.status === 'pending',
-                             'bg-blue-50 text-blue-700 border-blue-100': activeBooking?.status === 'approved',
-                             'bg-indigo-50 text-indigo-700 border-indigo-100': activeBooking?.status === 'in_progress',
-                             'bg-green-50 text-green-700 border-green-100': activeBooking?.status === 'completed',
-                             'bg-red-50 text-red-700 border-red-100': activeBooking?.status === 'rejected',
-                         }"
-                         x-text="
-                             activeBooking?.status === 'pending' ? 'Menunggu Konfirmasi' :
-                             activeBooking?.status === 'approved' ? 'Disetujui / Menunggu Servis' :
-                             activeBooking?.status === 'in_progress' ? 'Sedang Dikerjakan' :
-                             activeBooking?.status === 'completed' ? 'Selesai' : 'Ditolak'
-                         "></div>
+        <template x-teleport="body">
+            <div x-cloak x-show="showModal" class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 overflow-y-auto">
+                <template x-if="showModal">
+                    <div @click.away="showModal = false" class="bg-white rounded-[24px] shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] my-8">
+                        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
+                            <div>
+                                <h3 class="text-lg font-black text-blue-950">Detail Servis <span x-text="'#' + activeBooking?.id"></span></h3>
+                                <p class="text-xs text-slate-500 font-medium">Plat Nomor: <span class="font-bold text-slate-700" x-text="activeBooking?.kendaraan?.plat_nomor"></span></p>
+                            </div>
+                            <button @click="showModal = false" class="text-slate-400 hover:text-red-500 bg-white rounded-full p-2 shadow-sm border border-slate-100">&times;</button>
+                        </div>
+                        
+                        <div class="p-6 overflow-y-auto flex-1 space-y-6">
+                            <!-- Dynamic Status Banner -->
+                            <div class="rounded-[16px] p-4 text-center font-bold text-sm uppercase tracking-widest border"
+                                 :class="{
+                                     'bg-orange-50 text-orange-700 border-orange-100': activeBooking?.status === 'pending',
+                                     'bg-blue-50 text-blue-700 border-blue-100': activeBooking?.status === 'approved',
+                                     'bg-indigo-50 text-indigo-700 border-indigo-100': activeBooking?.status === 'in_progress',
+                                     'bg-green-50 text-green-700 border-green-100': activeBooking?.status === 'completed',
+                                     'bg-red-50 text-red-700 border-red-100': activeBooking?.status === 'rejected',
+                                 }"
+                                 x-text="
+                                     activeBooking?.status === 'pending' ? 'Menunggu Konfirmasi' :
+                                     activeBooking?.status === 'approved' ? 'Disetujui / Menunggu Servis' :
+                                     activeBooking?.status === 'in_progress' ? 'Sedang Dikerjakan' :
+                                     activeBooking?.status === 'completed' ? 'Selesai' : 'Ditolak'
+                                 "></div>
 
-                    <!-- Timeline Log -->
-                    <div>
-                        <h4 class="text-sm font-black text-blue-950 mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            Timeline Progres Servis
-                        </h4>
-                        <div class="relative border-l-2 border-slate-200 ml-3 space-y-6 pb-2">
-                            <template x-for="log in activeBooking?.progres" :key="log.id">
-                                <div class="relative pl-6">
-                                    <div class="absolute -left-[9px] top-1 w-4 h-4 bg-white border-2 border-red-500 rounded-full"></div>
-                                    <p class="text-xs text-slate-400 font-bold mb-0.5" x-text="new Date(log.created_at).toLocaleString('id-ID')"></p>
-                                    <p class="text-sm font-medium text-slate-700" x-text="log.status_log"></p>
+                            <!-- Timeline Log -->
+                            <div>
+                                <h4 class="text-sm font-black text-blue-950 mb-4 flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    Timeline Progres Servis
+                                </h4>
+                                <div class="relative border-l-2 border-slate-200 ml-3 space-y-6 pb-2">
+                                    <template x-for="log in activeBooking?.progres" :key="log.id">
+                                        <div class="relative pl-6">
+                                            <div class="absolute -left-[9px] top-1 w-4 h-4 bg-white border-2 border-red-500 rounded-full"></div>
+                                            <p class="text-xs text-slate-400 font-bold mb-0.5" x-text="new Date(log.created_at).toLocaleString('id-ID')"></p>
+                                            <p class="text-sm font-medium text-slate-700" x-text="log.status_log"></p>
+                                        </div>
+                                    </template>
+                                    <div x-show="!activeBooking?.progres || activeBooking?.progres.length === 0" class="text-sm text-slate-500 italic">Belum ada progres log.</div>
+                                </div>
+                            </div>
+
+                            <!-- Quotation approval section -->
+                            <template x-if="activeBooking?.quotation_status === 'sent'">
+                                <div class="bg-orange-50 border border-orange-200 rounded-2xl p-5">
+                                    <h4 class="text-sm font-black text-orange-900 mb-2">Persetujuan Estimasi Biaya & Sparepart</h4>
+                                    <p class="text-xs text-orange-850 font-medium mb-4" x-text="'Catatan Kerusakan: ' + activeBooking?.catatan_kerusakan"></p>
+                                    
+                                    <form :action="'/user/booking/' + activeBooking?.id + '/approve-quotation'" method="POST" class="space-y-4">
+                                        @csrf @method('PATCH')
+                                        
+                                        <!-- List of spare parts with checkboxes -->
+                                        <div class="space-y-2">
+                                            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Pilih Sparepart yang Disetujui:</p>
+                                            <template x-for="item in activeBooking?.pemakaian_barang" :key="item.id">
+                                                <label class="flex items-center gap-3 p-3 border border-orange-200 rounded-xl cursor-pointer hover:bg-orange-100/50 transition-colors bg-white">
+                                                    <input type="checkbox" name="approved_items[]" :value="item.pivot.id.toString()" x-model="approvedItems" class="w-4 h-4 text-green-600 rounded border-orange-300 focus:ring-green-500">
+                                                    <div class="flex-1 flex justify-between text-sm">
+                                                        <span class="font-medium text-blue-950">
+                                                            <span x-text="item.nama_barang"></span>
+                                                            <span class="text-xs text-slate-500 ml-1" x-text="'x' + item.pivot.jumlah"></span>
+                                                        </span>
+                                                        <span class="font-bold text-slate-700" x-text="'Rp ' + (parseInt(item.harga_satuan) * parseInt(item.pivot.jumlah)).toLocaleString('id-ID')"></span>
+                                                    </div>
+                                                </label>
+                                            </template>
+                                            <div x-show="!activeBooking?.pemakaian_barang || activeBooking?.pemakaian_barang.length === 0" class="text-xs text-slate-500 italic">Tidak ada sparepart tambahan yang ditawarkan.</div>
+                                        </div>
+                                        
+                                        <div class="flex gap-3 pt-2">
+                                            <button name="status" value="approved" class="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-sm shadow transition-all">Setujui Estimasi</button>
+                                            <button name="status" value="rejected" class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm shadow transition-all">Tolak Semua</button>
+                                        </div>
+                                    </form>
                                 </div>
                             </template>
-                            <div x-show="!activeBooking?.progres || activeBooking?.progres.length === 0" class="text-sm text-slate-500 italic">Belum ada progres log.</div>
-                        </div>
-                    </div>
 
-                    <!-- Quotation approval section -->
-                    <template x-if="activeBooking?.quotation_status === 'sent'">
-                        <div class="bg-orange-50 border border-orange-200 rounded-2xl p-5">
-                            <h4 class="text-sm font-black text-orange-900 mb-2">Persetujuan Estimasi Biaya & Sparepart</h4>
-                            <p class="text-xs text-orange-850 font-medium mb-4" x-text="'Catatan Kerusakan: ' + activeBooking?.catatan_kerusakan"></p>
-                            
-                            <form :action="'/user/booking/' + activeBooking?.id + '/approve-quotation'" method="POST" class="space-y-4">
-                                @csrf @method('PATCH')
+                            <!-- Show Invoice summary if already completed or has active items -->
+                            <div class="border-t border-slate-200 pt-6" x-show="activeBooking?.status === 'completed' || (activeBooking?.pemakaian_barang && activeBooking?.pemakaian_barang.length > 0)">
+                                <h4 class="text-sm font-black text-blue-950 mb-4 flex items-center justify-between">
+                                    <span class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                        Rincian Biaya
+                                    </span>
+                                    <span class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full" x-show="activeBooking?.nomor_invoice" x-text="activeBooking?.nomor_invoice"></span>
+                                </h4>
                                 
-                                <!-- List of spare parts with checkboxes -->
-                                <div class="space-y-2">
-                                    <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Pilih Sparepart yang Disetujui:</p>
-                                    <template x-for="item in activeBooking?.pemakaian_barang" :key="item.id">
-                                        <label class="flex items-center gap-3 p-3 border border-orange-200 rounded-xl cursor-pointer hover:bg-orange-100/50 transition-colors bg-white">
-                                            <input type="checkbox" name="approved_items[]" :value="item.pivot.id" checked class="w-4 h-4 text-green-600 rounded border-orange-300 focus:ring-green-500">
-                                            <div class="flex-1 flex justify-between text-sm">
+                                <div class="bg-slate-50 rounded-[16px] p-5 border border-slate-200 mb-4">
+                                    <div class="mb-4">
+                                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 border-b border-slate-200 pb-1">Jasa & Servis</p>
+                                        <template x-for="paket in activeBooking?.paket_servis" :key="paket.id">
+                                            <div class="flex justify-between text-sm mb-1">
+                                                <span class="font-medium text-blue-950" x-text="paket.nama_paket"></span>
+                                                <span class="font-bold text-slate-700" x-text="'Rp ' + parseInt(paket.harga_jasa).toLocaleString('id-ID')"></span>
+                                            </div>
+                                        </template>
+                                        <div x-show="!activeBooking?.paket_servis || activeBooking?.paket_servis.length === 0" class="text-sm text-slate-500 italic">Servis Umum</div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 border-b border-slate-200 pb-1">Sparepart & Oli</p>
+                                        <template x-for="item in activeBooking?.pemakaian_barang" :key="item.id">
+                                            <div class="flex justify-between text-sm mb-1" x-show="activeBooking?.quotation_status === 'sent' ? approvedItems.includes(item.pivot.id.toString()) : (item.pivot.is_approved == 1 || item.pivot.is_approved == true)">
                                                 <span class="font-medium text-blue-950">
-                                                    <span x-text="item.nama_barang"></span>
+                                                    <span x-text="item.nama_barang"></span> 
                                                     <span class="text-xs text-slate-500 ml-1" x-text="'x' + item.pivot.jumlah"></span>
                                                 </span>
                                                 <span class="font-bold text-slate-700" x-text="'Rp ' + (parseInt(item.harga_satuan) * parseInt(item.pivot.jumlah)).toLocaleString('id-ID')"></span>
                                             </div>
-                                        </label>
-                                    </template>
-                                    <div x-show="!activeBooking?.pemakaian_barang || activeBooking?.pemakaian_barang.length === 0" class="text-xs text-slate-500 italic">Tidak ada sparepart tambahan yang ditawarkan.</div>
-                                </div>
-                                
-                                <div class="flex gap-3 pt-2">
-                                    <button name="status" value="approved" class="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-sm shadow transition-all">Setujui Estimasi</button>
-                                    <button name="status" value="rejected" class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm shadow transition-all">Tolak Semua</button>
-                                </div>
-                            </form>
-                        </div>
-                    </template>
-
-                    <!-- Show Invoice summary if already completed or has active items -->
-                    <div class="border-t border-slate-200 pt-6" x-show="activeBooking?.status === 'completed' || (activeBooking?.pemakaian_barang && activeBooking?.pemakaian_barang.length > 0)">
-                        <h4 class="text-sm font-black text-blue-950 mb-4 flex items-center justify-between">
-                            <span class="flex items-center gap-2">
-                                <svg class="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                Rincian Biaya
-                            </span>
-                            <span class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full" x-show="activeBooking?.nomor_invoice" x-text="activeBooking?.nomor_invoice"></span>
-                        </h4>
-                        
-                        <div class="bg-slate-50 rounded-[16px] p-5 border border-slate-200">
-                            <div class="mb-4">
-                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 border-b border-slate-200 pb-1">Jasa & Servis</p>
-                                <template x-for="paket in activeBooking?.paket_servis" :key="paket.id">
-                                    <div class="flex justify-between text-sm mb-1">
-                                        <span class="font-medium text-blue-950" x-text="paket.nama_paket"></span>
-                                        <span class="font-bold text-slate-700" x-text="'Rp ' + parseInt(paket.harga_jasa).toLocaleString('id-ID')"></span>
+                                        </template>
+                                        <div x-show="!activeBooking?.pemakaian_barang || activeBooking?.pemakaian_barang.length === 0" class="text-sm text-slate-500 italic">Tidak ada sparepart tambahan.</div>
                                     </div>
-                                </template>
-                                <div x-show="!activeBooking?.paket_servis || activeBooking?.paket_servis.length === 0" class="text-sm text-slate-500 italic">Servis Umum</div>
+                                    <div class="border-t border-slate-300 pt-3 mt-2 flex justify-between items-center">
+                                         <span class="font-black text-blue-950">ESTIMASI / TOTAL BIAYA</span>
+                                         <span class="text-xl font-black text-red-600" x-text="'Rp ' + parseInt(calculateModalTotal).toLocaleString('id-ID')"></span>
+                                     </div>
+                                </div>
                             </div>
-
-                            <div class="mb-4">
-                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 border-b border-slate-200 pb-1">Sparepart & Oli</p>
-                                <template x-for="item in activeBooking?.pemakaian_barang" :key="item.id">
-                                    <div class="flex justify-between text-sm mb-1" x-show="item.pivot.is_approved">
-                                        <span class="font-medium text-blue-950">
-                                            <span x-text="item.nama_barang"></span> 
-                                            <span class="text-xs text-slate-500 ml-1" x-text="'x' + item.pivot.jumlah"></span>
-                                        </span>
-                                        <span class="font-bold text-slate-700" x-text="'Rp ' + (parseInt(item.harga_satuan) * parseInt(item.pivot.jumlah)).toLocaleString('id-ID')"></span>
-                                    </div>
-                                </template>
-                                <div x-show="!activeBooking?.pemakaian_barang || activeBooking?.pemakaian_barang.length === 0" class="text-sm text-slate-500 italic">Tidak ada sparepart tambahan.</div>
-                            </div>
-
-                            <div class="border-t border-slate-300 pt-3 mt-2 flex justify-between items-center">
-                                <span class="font-black text-blue-950">ESTIMASI / TOTAL BIAYA</span>
-                                <span class="text-xl font-black text-red-600" x-text="'Rp ' + parseInt(activeBooking?.total_harga || 0).toLocaleString('id-ID')"></span>
-                            </div>
-                        </div>
                     </div>
-                </div>
+                </template>
             </div>
-        </div>
+        </template>
     </div>
+
+    <x-slot name="scripts">
+        <script>
+            document.addEventListener('alpine:init', () => {
+                Alpine.data('historyManager', (initialBookings) => ({
+                    showModal: false,
+                    activeBooking: null,
+                    activeTab: 'all',
+                    bookings: initialBookings,
+                    approvedItems: [],
+                    get activeCount() {
+                        return this.bookings.filter(b => ['pending', 'approved', 'in_progress'].includes(b.status)).length;
+                    },
+                    get completedCount() {
+                        return this.bookings.filter(b => b.status === 'completed').length;
+                    },
+                    get rejectedCount() {
+                        return this.bookings.filter(b => b.status === 'rejected').length;
+                    },
+                    openModal(b) {
+                        this.activeBooking = b;
+                        this.showModal = true;
+                        this.approvedItems = [];
+                        if (b && b.pemakaian_barang) {
+                            b.pemakaian_barang.forEach(item => {
+                                if (item.pivot && (item.pivot.is_approved == 1 || item.pivot.is_approved == true)) {
+                                    this.approvedItems.push(item.pivot.id.toString());
+                                }
+                            });
+                        }
+                    },
+                    get calculateModalTotal() {
+                        if (!this.activeBooking) return 0;
+                        if (this.activeBooking.status === 'completed') {
+                            return parseInt(this.activeBooking.total_harga || 0);
+                        }
+                        let totalJasa = this.activeBooking.paket_servis ? this.activeBooking.paket_servis.reduce((sum, p) => sum + parseInt(p.harga_jasa || 0), 0) : 0;
+                        let totalSparepart = 0;
+                        if (this.activeBooking.pemakaian_barang) {
+                            this.activeBooking.pemakaian_barang.forEach(item => {
+                                if (this.activeBooking.quotation_status === 'sent') {
+                                    if (this.approvedItems.includes(item.pivot.id.toString())) {
+                                        totalSparepart += parseInt(item.harga_satuan || 0) * parseInt(item.pivot.jumlah || 0);
+                                    }
+                                } else {
+                                    if (item.pivot && (item.pivot.is_approved == 1 || item.pivot.is_approved == true)) {
+                                        totalSparepart += parseInt(item.harga_satuan || 0) * parseInt(item.pivot.jumlah || 0);
+                                    }
+                                }
+                            });
+                        }
+                        return totalJasa + totalSparepart;
+                    }
+                }));
+            });
+        </script>
+    </x-slot>
 </x-sidebar-layout>

@@ -9,41 +9,31 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
+    // Mengaktifkan fitur token API (Sanctum), factory pengisi data palsu, dan notifikasi email/sistem
     use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    // Field/column yang boleh diisi langsung lewat form (Mass Assignment)
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'role',
-        'nomor_telepon',
+        'name',          // Nama lengkap pengguna
+        'email',         // Alamat email pengguna buat login
+        'password',      // Kata sandi akun (yang nantinya di-hash)
+        'role',          // Pangkat/peran pengguna (superadmin, admin, guru, mekanik, user)
+        'nomor_telepon', // Nomor telepon atau WA pengguna
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
+    // Field/column yang disembunyikan saat data pengguna diubah jadi JSON (misal buat API)
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password',       // Kata sandi tidak boleh bocor keluar
+        'remember_token', // Token pengingat login otomatis
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    // Konversi tipe data otomatis saat dibaca dari database (Casting)
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'email_verified_at' => 'datetime', // Diubah jadi tipe tanggal-waktu
+            'password' => 'hashed',            // Otomatis di-hash pas disimpan
         ];
     }
 }
+
