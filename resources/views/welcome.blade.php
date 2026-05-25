@@ -11,6 +11,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('images/MotoSkensaLogo1.png') }}" type="image/png">
+    
     <style>
         body { font-family: 'Urbanist', sans-serif; }
         .honda-red { color: #E3000F; }
@@ -21,44 +24,25 @@
         /* Custom Ultra Smooth Easing */
         .nav-transition {
             transition: all 0.9s cubic-bezier(0.16, 1, 0.3, 1);
-            will-change: max-width, width, background-color, border-radius, box-shadow, backdrop-filter, border-color, padding-top;
+            will-change: max-width, width, background-color, border-radius, box-shadow, backdrop-filter, border-color;
         }
 
-        /* Scrolled Styles Fallback to ensure it works 100% of the time */
-        #navbar.is-scrolled {
-            padding-top: 1rem !important;
-        }
-        #nav-container.is-scrolled {
-            background-color: rgba(255, 255, 255, 0.95) !important;
-            backdrop-filter: blur(12px) !important;
-            -webkit-backdrop-filter: blur(12px) !important;
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1) !important;
-            border-radius: 9999px !important;
-            max-width: 64rem !important; /* max-w-5xl */
-            border: none !important;
-        }
-        #navbar.is-scrolled #nav-logo {
-            filter: drop-shadow(0 0 0 transparent) !important;
-        }
-        #navbar.is-scrolled #nav-title-moto {
-            color: #dc2626 !important; /* text-red-600 */
-        }
     </style>
 </head>
 <body class="bg-white text-blue-950 antialiased selection:bg-red-100 selection:text-red-900">
 
     <!-- Navbar -->
-    <nav id="navbar" class="fixed w-full top-0 z-50 pt-8 group nav-transition">
-        <div id="nav-container" class="w-full max-w-full mx-auto nav-transition group-[.is-scrolled]:bg-white/95 group-[.is-scrolled]:backdrop-blur-md group-[.is-scrolled]:shadow-2xl group-[.is-scrolled]:rounded-full group-[.is-scrolled]:max-w-5xl">
+    <nav id="navbar" class="fixed w-full top-0 z-50 pt-8 group/nav nav-transition">
+        <div id="nav-container" class="w-full max-w-full mx-auto nav-transition group-[.is-scrolled]/nav:bg-white/95 group-[.is-scrolled]/nav:backdrop-blur-md group-[.is-scrolled]/nav:shadow-2xl group-[.is-scrolled]/nav:rounded-full group-[.is-scrolled]/nav:max-w-5xl  group-[.is-scrolled]/nav:border-white/50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-20 px-4 nav-transition">
                     <!-- Logo (Kiri) -->
                     <div class="flex items-center w-1/4">
                         <!-- Logo -->
                         <div class="flex-shrink-0 flex items-center gap-2">
-                            <img src="{{ asset('images/MotoSkensaLogo1.png') }}" alt="MotoSkensa Logo" class="h-10 w-auto drop-shadow-md nav-transition group-[.is-scrolled]:drop-shadow-none" id="nav-logo" />
+                            <img src="{{ asset('images/MotoSkensaLogo1.png') }}" alt="MotoSkensa Logo" class="h-10 w-auto drop-shadow-md nav-transition group-[.is-scrolled]/nav:drop-shadow-none" id="nav-logo" />
                             <div class="flex flex-col">
-                                <span class="font-extrabold text-2xl leading-tight tracking-tight text-blue-950 nav-transition" id="nav-title">Skensa<span class="text-red-500 group-[.is-scrolled]:text-red-600 nav-transition" id="nav-title-moto">Moto</span></span>
+                                <span class="font-extrabold text-2xl leading-tight tracking-tight text-blue-950 nav-transition group-[.is-scrolled]/nav:text-blue-950" id="nav-title">Skensa<span class="text-red-500 group-[.is-scrolled]/nav:text-red-600 nav-transition" id="nav-title-moto">Moto</span></span>
                             </div>
                         </div>
                     </div>
@@ -66,9 +50,9 @@
                     <!-- Menu (Tengah) -->
                     <div class="hidden lg:flex items-center justify-center w-2/4">
                         <div class="flex items-center gap-8 px-2">
-                            <a href="#" class="nav-link text-blue-950/80 hover:text-red-600 font-bold nav-transition group-[.is-scrolled]:text-blue-950/80 group-[.is-scrolled]:hover:text-red-600">Beranda</a>
-                            <a href="#services" class="nav-link text-blue-950/80 hover:text-red-600 font-bold nav-transition group-[.is-scrolled]:text-blue-950/80 group-[.is-scrolled]:hover:text-red-600">Layanan Standar</a>
-                            <a href="#schedule" class="nav-link text-white/80 hover:text-red-600 font-bold nav-transition group-[.is-scrolled]:text-blue-950/80 group-[.is-scrolled]:hover:text-red-600">Jadwal Booking</a>
+                            <a href="#" class="nav-link text-blue-950/90 hover:text-red-600 font-bold nav-transition group-[.is-scrolled]/nav:text-blue-950/80 group-[.is-scrolled]/nav:hover:text-red-600">Beranda</a>
+                            <a href="#services" class="nav-link text-blue-950/90 hover:text-red-600 font-bold nav-transition group-[.is-scrolled]/nav:text-blue-950/80 group-[.is-scrolled]/nav:hover:text-red-600">Layanan Standar</a>
+                            <a href="#schedule" class="nav-link text-white/90 hover:text-white font-bold nav-transition group-[.is-scrolled]/nav:text-blue-950/80 group-[.is-scrolled]/nav:hover:text-red-600">Jadwal Booking</a>
                         </div>
                     </div>
 
@@ -519,3 +503,5 @@
     </script>
 </body>
 </html>
+
+

@@ -108,7 +108,7 @@
                     </div>
                     <div class="p-6 space-y-4">
                         @forelse($bookings->take(5) as $b)
-                            <div class="border border-slate-100 rounded-2xl p-5 hover:shadow-md transition-all group bg-white">
+                            <div class="border border-slate-200 rounded-2xl p-5 bg-white hover:border-red-300 transition shadow-sm group">
                                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-3">
                                     <div class="flex items-center gap-3">
                                         <div class="w-10 h-10 bg-slate-50 text-blue-950 rounded-xl flex items-center justify-center font-black border border-slate-100 shadow-sm">
@@ -137,7 +137,7 @@
                                 </div>
                                 <div class="pl-[52px]">
                                     <p class="text-xs text-slate-500 font-medium line-clamp-1 italic mb-3">"{{ $b->keluhan }}"</p>
-                                    <button @click="openModal(@js($b))" class="w-full py-2 bg-slate-50 text-blue-950 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-100 group-hover:bg-red-600 group-hover:text-white group-hover:border-red-600 transition-all">
+                                    <button @click="openModal(@js($b))" class="w-full py-2 bg-slate-100 text-blue-950 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-300 group-hover:bg-red-600 group-hover:text-white group-hover:border-red-600 transition-all shadow-sm">
                                         Detail & Progres
                                     </button>
                                 </div>

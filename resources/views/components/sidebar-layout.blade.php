@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'Dashboard' }} - MotoSkensa</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('images/MotoSkensaLogo1.png') }}" type="image/png">
+    
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -148,7 +152,7 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-bold text-blue-950 truncate">{{ auth()->user()->name }}</p>
-                    <p class="text-xs text-slate-500 truncate">{{ ucfirst(auth()->user()->role) }}</p>
+                    <!-- <p class="text-xs text-slate-500 truncate">{{ ucfirst(auth()->user()->role) }}</p> -->
                 </div>
             </div>
             <div class="mt-2">
