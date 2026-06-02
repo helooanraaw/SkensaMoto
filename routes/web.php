@@ -74,7 +74,7 @@ Route::middleware('auth')->group(function () {
         // Proses booking servis
         Route::post('/booking', [UserController::class, 'storeBooking'])->name('booking.store');
         Route::patch('/booking/{booking}/approve-quotation', [UserController::class, 'approveQuotation'])->name('booking.approve_quotation'); // Setujuin biaya sparepart
-        Route::get('/booking/{booking}/invoice', [UserController::class, 'downloadInvoice'])->name('booking.invoice'); // Download nota PDF
+        Route::get('/booking/{booking}/invoice', [UserController::class, 'downloadInvoice'])->name('booking.invoice'); // Download invoice PDF
         
         Route::get('/history', [UserController::class, 'history'])->name('history'); // Liat riwayat servis lama
         
@@ -97,6 +97,7 @@ Route::middleware('auth')->group(function () {
         Route::patch('/bookings/{booking}/start', [AdminController::class, 'startBooking'])->name('bookings.start'); // Mulai ngerjain motor
         Route::post('/bookings/{booking}/send-quotation', [AdminController::class, 'sendQuotation'])->name('bookings.send_quotation'); // Kirim rincian biaya ke user
         Route::patch('/bookings/{booking}/complete', [AdminController::class, 'completeBooking'])->name('bookings.complete'); // Tandai servis sudah kelar
+        Route::patch('/bookings/{booking}/payment', [AdminController::class, 'updatePaymentStatus'])->name('bookings.update_payment'); // Ubah status pembayaran
         Route::patch('/bookings/{booking}/reject', [AdminController::class, 'rejectBooking'])->name('bookings.reject')->middleware('role:superadmin,admin'); // Tolak booking
         
         // Kelola stok sparepart (Inventory)

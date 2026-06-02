@@ -108,9 +108,21 @@
                                         'rejected' => 'Ditolak',
                                     ];
                                 @endphp
-                                <span class="px-3 py-1 rounded-full text-xs font-bold {{ $statusColors[$booking->status] }}">
-                                    {{ $statusLabels[$booking->status] }}
-                                </span>
+                                @if($booking->status === 'completed')
+                                    @if(($booking->payment_status ?? 'unpaid') === 'paid')
+                                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold whitespace-nowrap">
+                                            Lunas
+                                        </span>
+                                    @else
+                                        <span class="px-3 py-1 bg-rose-100 text-rose-700 rounded-full text-xs font-bold whitespace-nowrap">
+                                            Belum Bayar
+                                        </span>
+                                    @endif
+                                @else
+                                    <span class="px-3 py-1 rounded-full text-xs font-bold {{ $statusColors[$booking->status] }} whitespace-nowrap">
+                                        {{ $statusLabels[$booking->status] }}
+                                    </span>
+                                @endif
                             </td>
                             <td class="py-4 px-6 text-right space-x-2">
                                 <button @click="openDetail({{ $booking->toJson() }})" class="text-slate-600 hover:text-slate-900 font-bold px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded transition-colors mr-1">Detail</button>
@@ -163,7 +175,25 @@
                                         </form>
                                     @endif
                                 @else
-                                    <span class="text-xs text-slate-400 font-bold italic">Selesai</span>
+                                    @if($booking->status === 'completed')
+                                        @if(($booking->payment_status ?? 'unpaid') === 'unpaid')
+                                            <form action="{{ route('admin.bookings.update_payment', $booking->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Tandai servis ini sebagai Lunas?');">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="payment_status" value="paid">
+                                                <button type="submit" class="text-green-600 hover:text-green-800 font-bold px-3 py-1.5 bg-green-50 hover:bg-green-100 rounded transition-colors whitespace-nowrap">Tandai Lunas</button>
+                                            </form>
+                                        @else
+                                            <form action="{{ route('admin.bookings.update_payment', $booking->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Tandai servis ini sebagai Belum Bayar?');">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="payment_status" value="unpaid">
+                                                <button type="submit" class="text-red-600 hover:text-red-800 font-bold px-3 py-1.5 bg-red-50 hover:bg-red-100 rounded transition-colors whitespace-nowrap">Tandai Belum Bayar</button>
+                                            </form>
+                                        @endif
+                                    @else
+                                        <span class="text-xs text-slate-400 font-bold italic whitespace-nowrap">{{ $statusLabels[$booking->status] }}</span>
+                                    @endif
                                 @endif
                             </td>
                         </tr>
@@ -309,10 +339,17 @@
                             
                             <template x-if="activeBooking?.nomor_invoice">
                                 <div class="mt-3 pt-3 border-t border-slate-200">
-                                    <p class="text-xs font-bold text-slate-400 uppercase">Nomor</p>
+                                    <p class="text-xs font-bold text-slate-400 uppercase">Nomor Invoice</p>
                                     <p class="text-sm font-black text-indigo-600" x-text="activeBooking?.nomor_invoice"></p>
                                 </div>
                             </template>
+                            
+                            <div class="mt-3 pt-3 border-t border-slate-200" x-show="activeBooking?.status === 'completed'">
+                                <p class="text-xs font-bold text-slate-400 uppercase">Status Pembayaran</p>
+                                <span class="inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold"
+                                      :class="activeBooking?.payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+                                      x-text="activeBooking?.payment_status === 'paid' ? 'Lunas' : 'Belum Bayar'"></span>
+                            </div>
                             
                             <template x-if="activeBooking?.mekanik">
                                 <div class="mt-3 pt-3 border-t border-slate-200">

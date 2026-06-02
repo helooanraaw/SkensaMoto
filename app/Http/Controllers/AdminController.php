@@ -195,6 +195,26 @@ class AdminController extends Controller
         }
     }
 
+    public function updatePaymentStatus(Request $request, Booking $booking)
+    {
+        $request->validate([
+            'payment_status' => 'required|in:unpaid,paid',
+        ]);
+
+        $booking->update([
+            'payment_status' => $request->payment_status,
+        ]);
+
+        $statusLabel = $request->payment_status === 'paid' ? 'Lunas' : 'Belum Bayar';
+
+        ProgresServis::create([
+            'booking_id' => $booking->id,
+            'status_log' => "Status pembayaran diubah menjadi: {$statusLabel}."
+        ]);
+
+        return back()->with('success', "Status pembayaran berhasil diubah menjadi {$statusLabel}.");
+    }
+
     public function sendQuotation(Request $request, Booking $booking)
     {
         $request->validate([

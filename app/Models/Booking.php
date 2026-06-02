@@ -25,6 +25,7 @@ class Booking extends Model
         'quotation_status',   // Persetujuan biaya dari pelanggan
         'mekanik_id',         // ID Mekanik yang ngerjain
         'nomor_invoice',      // Nomor nota/tagihan unik
+        'payment_status',     // Status pembayaran (unpaid, paid)
     ];
 
     // Relasi: Mengetahui siapa pelanggan yang melakukan booking ini

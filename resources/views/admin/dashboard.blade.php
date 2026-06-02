@@ -114,7 +114,11 @@
                                     @elseif($b->status === 'in_progress')
                                         <span class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-bold">Dikerjakan</span>
                                     @elseif($b->status === 'completed')
-                                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">Selesai</span>
+                                        @if(($b->payment_status ?? 'unpaid') === 'paid')
+                                            <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold whitespace-nowrap">Lunas</span>
+                                        @else
+                                            <span class="px-3 py-1 bg-rose-100 text-rose-700 rounded-full text-xs font-bold whitespace-nowrap">Belum Bayar</span>
+                                        @endif
                                     @else
                                         <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold">Ditolak</span>
                                     @endif

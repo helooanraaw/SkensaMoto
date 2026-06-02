@@ -97,7 +97,11 @@
                                                 <span class="w-1.5 h-1.5 bg-indigo-600 rounded-full animate-pulse"></span> Servis
                                             </span>
                                         @elseif($booking->status === 'completed')
-                                            <span class="px-2.5 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full text-[10px] font-black uppercase tracking-widest">Selesai</span>
+                                            @if(($booking->payment_status ?? 'unpaid') === 'paid')
+                                                <span class="px-2.5 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap">Lunas</span>
+                                            @else
+                                                <span class="px-2.5 py-1 bg-rose-50 text-rose-600 border border-rose-100 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap">Belum Bayar</span>
+                                            @endif
                                         @else
                                             <span class="px-2.5 py-1 bg-red-50 text-red-600 border border-red-100 rounded-full text-[10px] font-black uppercase tracking-widest">Ditolak</span>
                                         @endif
@@ -178,7 +182,7 @@
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                Cetak Nota
+                                Cetak Invoice
                             </a>
                             @endif
                         </div>
@@ -202,20 +206,21 @@
                         
                         <div class="p-6 overflow-y-auto flex-1 space-y-6">
                             <!-- Dynamic Status Banner -->
-                            <div class="rounded-[16px] p-4 text-center font-bold text-sm uppercase tracking-widest border"
-                                 :class="{
-                                     'bg-orange-50 text-orange-700 border-orange-100': activeBooking?.status === 'pending',
-                                     'bg-blue-50 text-blue-700 border-blue-100': activeBooking?.status === 'approved',
-                                     'bg-indigo-50 text-indigo-700 border-indigo-100': activeBooking?.status === 'in_progress',
-                                     'bg-green-50 text-green-700 border-green-100': activeBooking?.status === 'completed',
-                                     'bg-red-50 text-red-700 border-red-100': activeBooking?.status === 'rejected',
-                                 }"
-                                 x-text="
-                                     activeBooking?.status === 'pending' ? 'Menunggu Konfirmasi' :
-                                     activeBooking?.status === 'approved' ? 'Disetujui / Menunggu Servis' :
-                                     activeBooking?.status === 'in_progress' ? 'Sedang Dikerjakan' :
-                                     activeBooking?.status === 'completed' ? 'Selesai' : 'Ditolak'
-                                 "></div>
+                             <div class="rounded-[16px] p-4 text-center font-bold text-sm uppercase tracking-widest border"
+                                  :class="{
+                                      'bg-orange-50 text-orange-700 border-orange-100': activeBooking?.status === 'pending',
+                                      'bg-blue-50 text-blue-700 border-blue-100': activeBooking?.status === 'approved',
+                                      'bg-indigo-50 text-indigo-700 border-indigo-100': activeBooking?.status === 'in_progress',
+                                      'bg-green-50 text-green-700 border-green-100': activeBooking?.status === 'completed' && activeBooking?.payment_status === 'paid',
+                                      'bg-rose-50 text-rose-700 border-rose-100': activeBooking?.status === 'completed' && activeBooking?.payment_status !== 'paid',
+                                      'bg-red-50 text-red-700 border-red-100': activeBooking?.status === 'rejected',
+                                  }"
+                                  x-text="
+                                      activeBooking?.status === 'pending' ? 'Menunggu Konfirmasi' :
+                                      activeBooking?.status === 'approved' ? 'Disetujui / Menunggu Servis' :
+                                      activeBooking?.status === 'in_progress' ? 'Sedang Dikerjakan' :
+                                      activeBooking?.status === 'completed' ? (activeBooking?.payment_status === 'paid' ? 'Lunas' : 'Belum Bayar') : 'Ditolak'
+                                  "></div>
 
                             <!-- Timeline Log -->
                             <div>
@@ -277,7 +282,15 @@
                                         <svg class="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                         Rincian Biaya
                                     </span>
-                                    <span class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full" x-show="activeBooking?.nomor_invoice" x-text="activeBooking?.nomor_invoice"></span>
+                                    <div class="flex gap-2">
+                                        <template x-if="activeBooking?.payment_status === 'paid'">
+                                            <span class="text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full">Lunas</span>
+                                        </template>
+                                        <template x-if="activeBooking?.payment_status !== 'paid' && activeBooking?.status === 'completed'">
+                                            <span class="text-xs font-bold text-rose-700 bg-rose-100 px-3 py-1 rounded-full">Belum Bayar</span>
+                                        </template>
+                                        <span class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full" x-show="activeBooking?.nomor_invoice" x-text="activeBooking?.nomor_invoice"></span>
+                                    </div>
                                 </h4>
                                 
                                 <div class="bg-slate-50 rounded-[16px] p-5 border border-slate-200 mb-4">

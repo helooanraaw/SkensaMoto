@@ -122,9 +122,12 @@
                     </div>
                 </td>
                 <td class="text-right">
-                    <h2 style="margin: 0; color: #1e293b; font-size: 28px;">NOTA SERVIS</h2>
+                    <h2 style="margin: 0; color: #1e293b; font-size: 28px;">INVOICE</h2>
                     <p style="margin: 5px 0 0 0; font-weight: bold; color: #dc2626;">#{{ $booking->nomor_invoice }}</p>
                     <p style="margin: 5px 0 0 0; color: #64748b;">Tanggal: {{ \Carbon\Carbon::parse($booking->tanggal)->format('d F Y') }}</p>
+                    <p style="margin: 5px 0 0 0; font-weight: bold; color: {{ ($booking->payment_status ?? 'unpaid') === 'paid' ? '#10b981' : '#dc2626' }};">
+                        STATUS: {{ ($booking->payment_status ?? 'unpaid') === 'paid' ? 'LUNAS' : 'BELUM BAYAR' }}
+                    </p>
                 </td>
             </tr>
         </table>
