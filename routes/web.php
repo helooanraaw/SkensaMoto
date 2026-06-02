@@ -63,7 +63,7 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
 
     // --- BAGIAN KHUSUS PELANGGAN (USER) ---
-    Route::prefix('user')->name('user.')->group(function () {
+    Route::middleware('role:user')->prefix('user')->name('user.')->group(function () {
         Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard'); // Dashboard user
         
         // Kelola data motor pelanggan

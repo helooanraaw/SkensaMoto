@@ -25,7 +25,7 @@ class RoleMiddleware
         }
 
         if (!in_array(auth()->user()->role, $roles)) {
-            abort(403, 'Anda tidak memiliki akses ke halaman ini.');
+            return redirect()->route('dashboard');
         }
 
         return $next($request);

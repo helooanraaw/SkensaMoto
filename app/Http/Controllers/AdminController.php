@@ -411,8 +411,13 @@ class AdminController extends Controller
 
     public function updateUserRole(Request $request, User $user)
     {
+        $allowedRoles = ['admin', 'mekanik', 'user'];
+        if (auth()->user()->role === 'superadmin') {
+            $allowedRoles[] = 'superadmin';
+        }
+
         $request->validate([
-            'role' => 'required|in:admin,guru,mekanik,user'
+            'role' => 'required|in:' . implode(',', $allowedRoles)
         ]);
 
         if ($user->id === auth()->id()) {

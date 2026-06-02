@@ -5,14 +5,13 @@
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
             <h2 class="text-2xl font-black text-blue-950">Manajemen Akun</h2>
-            <p class="text-sm text-slate-500 font-medium mt-1">Atur wewenang pengguna (Admin, Guru, Mekanik, Pelanggan).</p>
+            <p class="text-sm text-slate-500 font-medium mt-1">Atur wewenang pengguna (Admin, Mekanik, Pelanggan).</p>
         </div>
         
         <form action="{{ route('admin.users.index') }}" method="GET" class="flex items-center gap-2">
             <select name="role" class="border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-blue-950 bg-white focus:ring-red-500 focus:border-red-500 transition-colors" onchange="this.form.submit()">
                 <option value="all" {{ request('role') == 'all' ? 'selected' : '' }}>Semua Role</option>
                 <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
-                <option value="guru" {{ request('role') == 'guru' ? 'selected' : '' }}>Guru</option>
                 <option value="mekanik" {{ request('role') == 'mekanik' ? 'selected' : '' }}>Mekanik</option>
                 <option value="user" {{ request('role') == 'user' ? 'selected' : '' }}>Pelanggan</option>
             </select>
@@ -54,14 +53,12 @@
                                     $roleColors = [
                                         'superadmin' => 'bg-red-100 text-red-700',
                                         'admin' => 'bg-purple-100 text-purple-700',
-                                        'guru' => 'bg-emerald-100 text-emerald-700',
                                         'mekanik' => 'bg-blue-100 text-blue-700',
                                         'user' => 'bg-slate-100 text-slate-700',
                                     ];
                                     $roleLabels = [
                                         'superadmin' => 'Super Admin',
                                         'admin' => 'Admin',
-                                        'guru' => 'Guru',
                                         'mekanik' => 'Mekanik',
                                         'user' => 'Pelanggan',
                                     ];
@@ -78,7 +75,6 @@
                                         <select name="role" class="text-sm border-slate-200 rounded-lg px-3 py-1.5 font-bold text-slate-600 bg-white focus:ring-red-500 focus:border-red-500" required>
                                             <option value="user" {{ $user->role == 'user' ? 'selected' : '' }}>Pelanggan</option>
                                             <option value="mekanik" {{ $user->role == 'mekanik' ? 'selected' : '' }}>Mekanik</option>
-                                            <option value="guru" {{ $user->role == 'guru' ? 'selected' : '' }}>Guru</option>
                                             <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
                                             @if(auth()->user()->role == 'superadmin')
                                             <option value="superadmin" {{ $user->role == 'superadmin' ? 'selected' : '' }}>Super Admin</option>

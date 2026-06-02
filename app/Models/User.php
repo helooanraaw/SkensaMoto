@@ -17,7 +17,7 @@ class User extends Authenticatable
         'name',          // Nama lengkap pengguna
         'email',         // Alamat email pengguna buat login
         'password',      // Kata sandi akun (yang nantinya di-hash)
-        'role',          // Pangkat/peran pengguna (superadmin, admin, guru, mekanik, user)
+        'role',          // Pangkat/peran pengguna (superadmin, admin, mekanik, user)
         'nomor_telepon', // Nomor telepon atau WA pengguna
     ];
 
