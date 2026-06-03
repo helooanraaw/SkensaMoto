@@ -1,5 +1,5 @@
 <x-sidebar-layout>
-    <x-slot name="title">Dashboard Admin</x-slot>
+    <x-slot name="title">{{ auth()->user()->role === 'superadmin' ? 'Dashboard Super Admin' : (auth()->user()->role === 'mekanik' ? 'Dashboard Mekanik' : 'Dashboard Admin') }}</x-slot>
 
     <div class="space-y-8">
         @php

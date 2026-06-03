@@ -112,233 +112,213 @@
     </div>
 
     <!-- Live Schedule Board -->
-    <div id="schedule" class="py-16 bg-gray-50 border-b border-gray-200" x-data="{ showModal: false, activeBookings: [], activeDate: '' }">
+    <div id="schedule" class="py-20 bg-gray-50/50 border-b border-slate-100" x-data="{ showModal: false, activeBookings: [], activeDate: '' }" x-effect="showModal ? document.body.classList.add('overflow-hidden') : document.body.classList.remove('overflow-hidden')">
         <div class="max-w-7xl mx-auto px-6 lg:px-8">
 
             <!-- Header -->
-            <div class="mb-10 pb-6 border-b border-gray-200">
+            <div class="mb-12 text-center lg:text-left">
+                <span class="text-red-600 font-bold uppercase tracking-wider text-xs block mb-2">Kuota & Antrean</span>
                 <h2 class="text-3xl font-extrabold text-blue-950">Jadwal Antrian Bengkel</h2>
-                <p class="mt-2 text-blue-950 font-medium max-w-2xl">
+                <p class="mt-2 text-slate-600 font-medium max-w-2xl text-sm leading-relaxed">
                     Untuk menjaga kualitas servis, kami membatasi jumlah motor setiap harinya.
-                    Silakan pilih hari yang tersedia (Warna Hijau) untuk melakukan booking tanpa antri lama di lokasi.
+                    Silakan pilih hari yang tersedia (Warna Hijau) untuk melihat antrean atau melakukan booking tanpa antre lama di lokasi.
                 </p>
             </div>
 
-            <!-- Booking Steps: Horizontal Hover Cards -->
-            <div class="mb-12 grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-8 items-start">
-                <!-- Step 1 -->
-                <div class="bg-white border rounded-2xl overflow-hidden transition-all duration-300 cursor-default"
-                     x-data="{ hovered: false }" @mouseenter="hovered = true" @mouseleave="hovered = false"
-                     :class="hovered ? 'border-red-400 shadow-xl  md:-translate-y-1' : 'border-slate-200 shadow-sm'">
-                    <div class="px-6 py-6 flex flex-col items-center gap-4 text-center relative z-10 bg-white transition-colors duration-300" :class="hovered ? 'bg-red-50/30' : ''">
-                        <div class="w-12 h-12 rounded-full font-black text-xl flex items-center justify-center transition-all duration-300"
-                             :class="hovered ? 'bg-red-600 text-white scale-110' : 'bg-red-50 text-red-500'">1</div>
-                        <span class="font-bold text-lg transition-colors" :class="hovered ? 'text-red-600' : 'text-blue-950'">Pilih Tanggal</span>
+            <!-- Main Grid layout for steps and schedule -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                
+                <!-- Left Column: Booking Steps (Stacked Vertically) -->
+                <div class="lg:col-span-5 space-y-4">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Panduan Antrean</p>
+                    <h3 class="text-base font-black text-blue-950 mb-4 border-b border-slate-200/60 pb-2">3 Langkah Mudah Booking</h3>
+                    
+                    <!-- Step 1 -->
+                    <div class="bg-white border border-slate-100 rounded-[20px] p-5 flex items-center gap-4 hover:border-red-300 hover:shadow-sm transition-all duration-300 shadow-sm">
+                        <div class="w-10 h-10 rounded-xl bg-red-50 text-red-500 font-black text-lg flex items-center justify-center shrink-0 border border-red-100">1</div>
+                        <div>
+                            <h4 class="font-extrabold text-sm text-blue-950">Pilih Tanggal</h4>
+                            <p class="text-xs text-slate-500 font-semibold mt-1 leading-normal">Cek ketersediaan jadwal pada hari-hari di sebelah kanan. Pilih tanggal yang masih memiliki sisa kuota.</p>
+                        </div>
                     </div>
-                    <div x-show="hovered" 
-                         x-transition:enter="transition ease-out duration-300" 
-                         x-transition:enter-start="opacity-0 -translate-y-4" 
-                         x-transition:enter-end="opacity-100 translate-y-0"
-                         x-transition:leave="transition ease-in duration-200" 
-                         x-transition:leave-start="opacity-100 translate-y-0" 
-                         x-transition:leave-end="opacity-0 -translate-y-4" 
-                         style="display: none;">
-                        <div class="px-6 pb-6 pt-2 text-center text-slate-500 text-sm font-medium leading-relaxed border-t border-slate-50">
-                            Cek ketersediaan jadwal pada kalender di bawah. Klik jadwal yang masih tersedia (warna hijau) untuk mulai melakukan antrean.
+
+                    <!-- Step 2 -->
+                    <div class="bg-white border border-slate-100 rounded-[20px] p-5 flex items-center gap-4 hover:border-red-300 hover:shadow-sm transition-all duration-300 shadow-sm">
+                        <div class="w-10 h-10 rounded-xl bg-red-50 text-red-500 font-black text-lg flex items-center justify-center shrink-0 border border-red-100">2</div>
+                        <div>
+                            <h4 class="font-extrabold text-sm text-blue-950">Isi Keluhan Motor</h4>
+                            <p class="text-xs text-slate-500 font-semibold mt-1 leading-normal">Setelah masuk ke akun Anda, daftarkan motor Honda Anda dan tulis keluhan mesin secara detail.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="bg-white border border-slate-100 rounded-[20px] p-5 flex items-center gap-4 hover:border-red-300 hover:shadow-sm transition-all duration-300 shadow-sm">
+                        <div class="w-10 h-10 rounded-xl bg-red-50 text-red-500 font-black text-lg flex items-center justify-center shrink-0 border border-red-100">3</div>
+                        <div>
+                            <h4 class="font-extrabold text-sm text-blue-950">Bawa Sesuai Jadwal</h4>
+                            <p class="text-xs text-slate-500 font-semibold mt-1 leading-normal">Bawa motor ke bengkel MotoSkensa tepat waktu. Motor Anda akan langsung masuk area pengerjaan.</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Step 2 -->
-                <div class="bg-white border rounded-2xl overflow-hidden transition-all duration-300 cursor-default"
-                     x-data="{ hovered: false }" @mouseenter="hovered = true" @mouseleave="hovered = false"
-                     :class="hovered ? 'border-red-400 shadow-xl/10 md:-translate-y-1' : 'border-slate-200 shadow-sm'">
-                    <div class="px-6 py-6 flex flex-col items-center gap-4 text-center relative z-10 bg-white transition-colors duration-300" :class="hovered ? 'bg-red-50/30' : ''">
-                        <div class="w-12 h-12 rounded-full font-black text-xl flex items-center justify-center transition-all duration-300"
-                             :class="hovered ? 'bg-red-600 text-white scale-110' : 'bg-red-50 text-red-500'">2</div>
-                        <span class="font-bold text-lg transition-colors" :class="hovered ? 'text-red-600' : 'text-blue-950'">Isi Keluhan Motor</span>
-                    </div>
-                    <div x-show="hovered" 
-                         x-transition:enter="transition ease-out duration-300" 
-                         x-transition:enter-start="opacity-0 -translate-y-4" 
-                         x-transition:enter-end="opacity-100 translate-y-0"
-                         x-transition:leave="transition ease-in duration-200" 
-                         x-transition:leave-start="opacity-100 translate-y-0" 
-                         x-transition:leave-end="opacity-0 -translate-y-4" 
-                         style="display: none;">
-                        <div class="px-6 pb-6 pt-2 text-center text-slate-500 text-sm font-medium leading-relaxed border-t border-slate-50">
-                            Setelah memilih jadwal, silakan login dan tuliskan kendala pada motor Anda agar mekanik kami bisa menyiapkan penanganan yang tepat.
-                        </div>
-                    </div>
-                </div>
+                <!-- Right Column: Daily Schedules (Stacked Vertically) -->
+                <div class="lg:col-span-7 space-y-4">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Ketersediaan Jadwal</p>
+                    <h3 class="text-base font-black text-blue-950 mb-4 border-b border-slate-200/60 pb-2">Kuota Servis Terbuka</h3>
+                    
+                    <div class="space-y-4">
+                        @forelse($schedules as $key => $schedule)
+                            @php
+                                $dateObj = \Carbon\Carbon::parse($schedule->tanggal)->locale('id');
+                                $dateStr = $dateObj->format('Y-m-d');
+                                $isToday   = $dateObj->isToday();
+                                $sisaKuotaMenit = $schedule->kapasitas_menit - $schedule->terpakai_menit;
+                                $isFull    = $sisaKuotaMenit <= 0;
+                                $isHoliday = $schedule->kapasitas_menit == 0;
+                            @endphp
 
-                <!-- Step 3 -->
-                <div class="bg-white border rounded-2xl overflow-hidden transition-all duration-300 cursor-default"
-                     x-data="{ hovered: false }" @mouseenter="hovered = true" @mouseleave="hovered = false"
-                     :class="hovered ? 'border-red-400 shadow-xl /10 md:-translate-y-1' : 'border-slate-200 shadow-sm'">
-                    <div class="px-6 py-6 flex flex-col items-center gap-4 text-center relative z-10 bg-white transition-colors duration-300" :class="hovered ? 'bg-red-50/30' : ''">
-                        <div class="w-12 h-12 rounded-full font-black text-xl flex items-center justify-center transition-all duration-300"
-                             :class="hovered ? 'bg-red-600 text-white scale-110' : 'bg-red-50 text-red-500'">3</div>
-                        <span class="font-bold text-lg transition-colors" :class="hovered ? 'text-red-600' : 'text-blue-950'">Bawa Sesuai Jadwal</span>
-                    </div>
-                    <div x-show="hovered" 
-                         x-transition:enter="transition ease-out duration-300" 
-                         x-transition:enter-start="opacity-0 -translate-y-4" 
-                         x-transition:enter-end="opacity-100 translate-y-0"
-                         x-transition:leave="transition ease-in duration-200" 
-                         x-transition:leave-start="opacity-100 translate-y-0" 
-                         x-transition:leave-end="opacity-0 -translate-y-4" 
-                         style="display: none;">
-                        <div class="px-6 pb-6 pt-2 text-center text-slate-500 text-sm font-medium leading-relaxed border-t border-slate-50">
-                            Datanglah ke bengkel MotoSkensa sesuai dengan jadwal yang telah Anda pilih tanpa perlu mengantre lama dari awal.
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 5 Jadwal — BERJEJER, TIDAK SCROLL -->
-            <div class="grid grid-cols-5 gap-5">
-                @forelse($schedules as $key => $schedule)
-                    @php
-                        $dateObj = \Carbon\Carbon::parse($schedule->tanggal)->locale('id');
-                        $dateStr = $dateObj->format('Y-m-d');
-                        $isToday   = $dateObj->isToday();
-                        $sisaKuotaMenit = $schedule->kapasitas_menit - $schedule->terpakai_menit;
-                        $isFull    = $sisaKuotaMenit <= 0;
-                        $isHoliday = $schedule->kapasitas_menit == 0;
-                        $isEmpty   = false;
-                    @endphp
-
-                    @if($isEmpty)
-                        {{-- Slot belum diisi admin --}}
-                        <div class="bg-white border border-dashed border-gray-300 rounded-2xl p-7 flex flex-col items-center justify-between opacity-50 cursor-not-allowed" style="min-height:290px">
-                            <div class="text-center">
-                                <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-5">{{ $dateObj->translatedFormat('l') }}</p>
-                                <p class="text-5xl font-black text-gray-300 leading-none mb-5">{{ $dateObj->format('j M') }}</p>
-                            </div>
-                            <div class="w-full">
-                                <div class="py-3 text-center text-xs font-bold text-gray-400 border border-dashed border-gray-300 rounded-xl">Belum Dijadwalkan</div>
-                            </div>
-                        </div>
-
-                    @elseif($isHoliday)
-                        <div class="bg-white border border-gray-200 rounded-2xl p-7 flex flex-col items-center justify-between" style="min-height:290px">
-                            <div class="text-center">
-                                <p class="text-xs font-black text-gray-500 uppercase tracking-widest mb-5">{{ $dateObj->translatedFormat('l') }}</p>
-                                <p class="text-5xl font-black text-blue-950 leading-none mb-5">{{ $dateObj->format('j M') }}</p>
-                                <span class="inline-block bg-slate-100 text-slate-500 text-xs font-bold px-4 py-1.5 rounded-full">Libur</span>
-                            </div>
-                            <div class="w-full">
-                                <div class="py-3 text-center text-sm font-bold text-slate-400 border border-slate-200 rounded-xl">Libur Sekolah</div>
-                            </div>
-                        </div>
-
-                    @elseif($isFull)
-                        <div class="bg-white border {{ $isToday ? 'border-red-400' : 'border-gray-200' }} rounded-2xl p-7 flex flex-col items-center justify-between" style="min-height:290px">
-                            <div class="text-center">
-                                <p class="text-xs font-black text-gray-500 uppercase tracking-widest mb-5">{{ $isToday ? 'HARI INI' : $dateObj->translatedFormat('l') }}</p>
-                                <p class="text-5xl font-black text-blue-950 leading-none mb-5">{{ $dateObj->format('j M') }}</p>
-                                <span class="inline-block bg-slate-100 text-slate-500 text-xs font-bold px-4 py-1.5 rounded-full">{{ substr($schedule->jam_buka,0,5) }} – {{ substr($schedule->jam_tutup,0,5) }} WITA</span>
-                            </div>
-                            <div class="w-full">
-                                <div class="py-3 text-center text-sm font-bold text-red-500 bg-red-50 border border-red-200 rounded-xl">Kuota Penuh</div>
-                            </div>
-                        </div>
-
-                    @else
-                        <button @click="showModal = true; activeDate = '{{ $dateObj->translatedFormat('d F Y') }}'; activeBookings = window.publicBookings['{{ $dateStr }}'] || []" class="block w-full text-left bg-white border {{ $isToday ? 'border-red-400' : 'border-gray-200 hover:border-green-400' }} rounded-2xl p-7 flex flex-col items-center justify-between transition-all duration-200 group cursor-pointer" style="min-height:290px">
-                            <div class="text-center">
-                                <p class="text-xs font-black text-gray-500 uppercase tracking-widest mb-5">{{ $isToday ? 'HARI INI' : $dateObj->translatedFormat('l') }}</p>
-                                <p class="text-5xl font-black text-blue-950 leading-none mb-5 group-hover:text-green-600 transition-colors">{{ $dateObj->format('j M') }}</p>
-                                <span class="inline-block bg-slate-100 text-slate-500 text-xs font-bold px-4 py-1.5 rounded-full">{{ substr($schedule->jam_buka,0,5) }} – {{ substr($schedule->jam_tutup,0,5) }} WITA</span>
-                            </div>
-                            <div class="w-full">
-                                <div class="py-3 px-2 text-center text-sm font-bold text-green-600 bg-green-50 border border-green-200 rounded-xl group-hover:bg-green-100 transition-colors">
-                                    Sisa Waktu: {{ $sisaKuotaMenit }} Menit
+                            @if($isHoliday)
+                                <div class="bg-white border border-slate-150 rounded-[20px] p-5 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-sm">
+                                    <div class="flex items-center gap-4 w-full sm:w-auto">
+                                        <div class="bg-slate-100 text-slate-500 rounded-xl p-2.5 text-center min-w-[75px] border border-slate-200 shadow-inner">
+                                            <p class="text-[8px] font-black uppercase tracking-widest leading-none">{{ $dateObj->translatedFormat('l') }}</p>
+                                            <p class="text-lg font-black leading-none mt-1.5">{{ $dateObj->format('j M') }}</p>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-extrabold text-sm text-slate-400">Libur Operasional</h4>
+                                            <p class="text-xs text-slate-400 font-semibold mt-0.5">Bengkel tutup / libur sekolah.</p>
+                                        </div>
+                                    </div>
+                                    <div class="shrink-0 bg-slate-50 text-slate-400 text-xs font-black px-4 py-2 border border-slate-200 rounded-xl uppercase tracking-wider">TUTUP</div>
                                 </div>
-                                <div class="mt-2 text-center text-[10px] text-gray-400 font-semibold group-hover:text-green-600 uppercase tracking-wider">Lihat Antrean &rarr;</div>
-                            </div>
-                        </button>
-                    @endif
 
-                @empty
-                    <div class="col-span-5 py-12 text-center text-slate-400">
-                        <p class="text-lg font-bold">Jadwal minggu ini belum tersedia.</p>
+                            @elseif($isFull)
+                                <div class="bg-white border {{ $isToday ? 'border-red-400 ring-2 ring-red-500/10' : 'border-slate-150' }} rounded-[20px] p-5 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-sm">
+                                    <div class="flex items-center gap-4 w-full sm:w-auto">
+                                        <div class="bg-red-50 text-red-600 rounded-xl p-2.5 text-center min-w-[75px] border border-red-100 shadow-inner">
+                                            <p class="text-[8px] font-black uppercase tracking-widest leading-none">{{ $isToday ? 'HARI INI' : $dateObj->translatedFormat('l') }}</p>
+                                            <p class="text-lg font-black leading-none mt-1.5">{{ $dateObj->format('j M') }}</p>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-extrabold text-sm text-blue-950">Kuota Penuh</h4>
+                                            <p class="text-xs text-slate-500 font-semibold mt-0.5">Jam Buka: {{ substr($schedule->jam_buka,0,5) }} – {{ substr($schedule->jam_tutup,0,5) }} WITA</p>
+                                        </div>
+                                    </div>
+                                    <div class="shrink-0 bg-red-50 text-red-600 text-xs font-black px-4 py-2 border border-red-200 rounded-xl uppercase tracking-wider">Penuh</div>
+                                </div>
+
+                            @else
+                                <div @click="showModal = true; activeDate = '{{ $dateObj->translatedFormat('d F Y') }}'; activeBookings = window.publicBookings['{{ $dateStr }}'] || []" 
+                                     class="w-full bg-white border {{ $isToday ? 'border-red-400 ring-2 ring-red-500/10' : 'border-slate-150' }} hover:border-green-400 hover:shadow-md rounded-[20px] p-5 flex flex-col sm:flex-row justify-between items-center gap-4 transition-all duration-300 group text-left cursor-pointer shadow-sm">
+                                    <div class="flex items-center gap-4 w-full sm:w-auto">
+                                        <div class="bg-green-50 text-green-600 rounded-xl p-2.5 text-center min-w-[75px] border border-green-100 group-hover:bg-green-100 transition shadow-inner">
+                                            <p class="text-[8px] font-black uppercase tracking-widest leading-none">{{ $isToday ? 'HARI INI' : $dateObj->translatedFormat('l') }}</p>
+                                            <p class="text-lg font-black leading-none mt-1.5">{{ $dateObj->format('j M') }}</p>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-extrabold text-sm text-blue-950 group-hover:text-green-600 transition-colors">Bengkel Dibuka</h4>
+                                            <p class="text-xs text-slate-500 font-semibold mt-0.5">Jam Buka: {{ substr($schedule->jam_buka,0,5) }} – {{ substr($schedule->jam_tutup,0,5) }} WITA</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto shrink-0 border-t border-slate-100 pt-3 sm:border-0 sm:pt-0">
+                                        <div class="bg-green-50 text-green-700 text-xs font-bold px-3 py-1.5 border border-green-200 rounded-xl">
+                                            Kuota: {{ $sisaKuotaMenit }} mnt
+                                        </div>
+                                        <div class="text-xs text-slate-400 group-hover:text-green-600 font-bold tracking-wider transition-all uppercase flex items-center gap-1">
+                                            Antrean
+                                            <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        @empty
+                            <div class="py-16 text-center text-slate-400 bg-white border border-slate-150 rounded-[20px] shadow-sm">
+                                <p class="text-xs font-black uppercase tracking-widest">Jadwal belum tersedia</p>
+                            </div>
+                        @endforelse
                     </div>
-                @endforelse
+                </div>
             </div>
 
         </div>
 
         <!-- MODAL ANTREAN ALPINE -->
-        <div x-cloak x-show="showModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 overflow-y-auto">
-            <div @click.away="showModal = false" class="bg-white rounded-[24px] shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all my-8">
-                <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                    <div>
-                        <h3 class="text-lg font-black text-blue-950">Daftar Antrean</h3>
-                        <p class="text-sm font-bold text-red-600" x-text="activeDate"></p>
-                    </div>
-                    <button @click="showModal = false" class="text-slate-400 hover:text-red-500 transition-colors">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
+        <template x-teleport="body">
+            <div x-cloak x-show="showModal" class="fixed inset-0 z-[9999]">
+                <!-- Backdrop Blur -->
+                <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-md"></div>
                 
-                <div class="p-6">
-                    <template x-if="activeBookings.length === 0">
-                        <div class="text-center py-10">
-                            <div class="w-16 h-16 bg-slate-100 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <!-- Modal Scroll Container -->
+                <div class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4">
+                    <div @click.away="showModal = false" class="bg-white rounded-[24px] shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all my-8 relative">
+                        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <div>
+                                <h3 class="text-lg font-black text-blue-950">Daftar Antrean</h3>
+                                <p class="text-sm font-bold text-red-600" x-text="activeDate"></p>
                             </div>
-                            <p class="text-lg font-bold text-slate-400">Belum ada antrean di tanggal ini.</p>
-                            <p class="text-sm text-slate-400 mt-2">Jadilah yang pertama booking!</p>
+                            <button @click="showModal = false" class="text-slate-400 hover:text-red-500 transition-colors">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
                         </div>
-                    </template>
+                        
+                        <div class="p-6">
+                            <template x-if="activeBookings.length === 0">
+                                <div class="text-center py-10">
+                                    <div class="w-16 h-16 bg-slate-100 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    </div>
+                                    <p class="text-lg font-bold text-slate-400">Belum ada antrean di tanggal ini.</p>
+                                    <p class="text-sm text-slate-400 mt-2">Jadilah yang pertama booking!</p>
+                                </div>
+                            </template>
 
-                    <template x-if="activeBookings.length > 0">
-                        <div class="space-y-4">
-                            <template x-for="(b, idx) in activeBookings" :key="b.id">
-                                <div class="p-4 border border-slate-100 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-red-200 transition-colors bg-white">
-                                    <div class="flex items-center gap-4">
-                                        <div class="w-10 h-10 bg-red-50 text-red-600 rounded-full flex items-center justify-center font-black text-lg border border-red-100 shadow-sm shrink-0">
-                                            <span x-text="idx + 1"></span>
+                            <template x-if="activeBookings.length > 0">
+                                <div class="space-y-4">
+                                    <template x-for="(b, idx) in activeBookings" :key="b.id">
+                                        <div class="p-4 border border-slate-100 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-red-200 transition-colors bg-white">
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-10 h-10 bg-red-50 text-red-600 rounded-full flex items-center justify-center font-black text-lg border border-red-100 shadow-sm shrink-0">
+                                                    <span x-text="idx + 1"></span>
+                                                </div>
+                                                <div>
+                                                    <p class="font-bold text-blue-950 flex items-center gap-2">
+                                                        <span x-text="b.kendaraan"></span>
+                                                    </p>
+                                                    <p class="text-xs font-bold text-slate-500 mt-1 uppercase tracking-wider" x-text="b.plat_nomor_masked"></p>
+                                                </div>
+                                            </div>
+                                            <div class="flex flex-col items-end gap-2 w-full sm:w-auto">
+                                                <!-- Status Badge -->
+                                                <template x-if="b.status === 'pending'">
+                                                    <span class="px-3 py-1 bg-orange-50 text-orange-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-orange-100 whitespace-nowrap">Menunggu Konfirmasi</span>
+                                                </template>
+                                                <template x-if="b.status === 'approved'">
+                                                    <span class="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-blue-100 whitespace-nowrap">Antrean Disetujui</span>
+                                                </template>
+                                                <template x-if="b.status === 'in_progress'">
+                                                    <span class="px-3 py-1 bg-yellow-50 text-yellow-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-yellow-100 whitespace-nowrap">Sedang Dikerjakan</span>
+                                                </template>
+                                                <template x-if="b.status === 'completed'">
+                                                    <span class="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-100 whitespace-nowrap">Selesai</span>
+                                                </template>
+                                                
+                                                <!-- Paket Servis -->
+                                                <p class="text-xs font-bold text-slate-400 max-w-[200px] truncate text-right" x-text="b.paket" :title="b.paket"></p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p class="font-bold text-blue-950 flex items-center gap-2">
-                                                <span x-text="b.kendaraan"></span>
-                                            </p>
-                                            <p class="text-xs font-bold text-slate-500 mt-1 uppercase tracking-wider" x-text="b.plat_nomor_masked"></p>
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-col items-end gap-2 w-full sm:w-auto">
-                                        <!-- Status Badge -->
-                                        <template x-if="b.status === 'pending'">
-                                            <span class="px-3 py-1 bg-orange-50 text-orange-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-orange-100 whitespace-nowrap">Menunggu Konfirmasi</span>
-                                        </template>
-                                        <template x-if="b.status === 'approved'">
-                                            <span class="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-blue-100 whitespace-nowrap">Antrean Disetujui</span>
-                                        </template>
-                                        <template x-if="b.status === 'in_progress'">
-                                            <span class="px-3 py-1 bg-yellow-50 text-yellow-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-yellow-100 whitespace-nowrap">Sedang Dikerjakan</span>
-                                        </template>
-                                        <template x-if="b.status === 'completed'">
-                                            <span class="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-100 whitespace-nowrap">Selesai</span>
-                                        </template>
-                                        
-                                        <!-- Paket Servis -->
-                                        <p class="text-xs font-bold text-slate-400 max-w-[200px] truncate text-right" x-text="b.paket" :title="b.paket"></p>
-                                    </div>
+                                    </template>
                                 </div>
                             </template>
                         </div>
-                    </template>
-                </div>
 
-                <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-between items-center">
-                    <p class="text-xs font-bold text-slate-400">*Plat nomor disensor sebagian untuk menjaga privasi.</p>
-                    <a href="/login" class="px-6 py-2.5 bg-red-600 text-white font-bold rounded-full text-sm shadow-md hover:bg-red-700 transition-colors">Booking Sekarang</a>
+                        <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-between items-center">
+                            <p class="text-xs font-bold text-slate-400">*Plat nomor disensor sebagian untuk menjaga privasi.</p>
+                            <a href="/login" class="px-6 py-2.5 bg-red-600 text-white font-bold rounded-full text-sm shadow-md hover:bg-red-700 transition-colors">Booking Sekarang</a>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </template>
 
     </div>
     

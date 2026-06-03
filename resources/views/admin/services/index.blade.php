@@ -9,7 +9,7 @@
                 this.editData = item;
                 this.showEditModal = true;
             }
-        }" class="space-y-6">
+        }" x-effect="(showCreateModal || showEditModal) ? document.body.classList.add('overflow-hidden') : document.body.classList.remove('overflow-hidden')" class="space-y-6">
 
         <!-- Header Actions -->
         <div class="flex justify-between items-center bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm">
@@ -17,9 +17,11 @@
                 <h2 class="text-xl font-black text-blue-950">Daftar Paket Servis</h2>
                 <p class="text-sm text-slate-500 font-medium">Kelola layanan servis, durasi pengerjaan, dan biaya jasa mekanik.</p>
             </div>
-            <button @click="showCreateModal = true" class="px-5 py-2.5 bg-red-600 text-white rounded-full text-sm font-bold shadow-md hover:bg-red-700 hover:-translate-y-0.5 transition-all">
+            @if(auth()->user()->role === 'admin')
+            <button @click="showCreateModal = true" class="px-5 py-2.5 bg-red-600 text-white rounded-full text-sm font-bold shadow-md hover:bg-red-700/90 transition-all">
                 + Tambah Paket
             </button>
+            @endif
         </div>
 
         <!-- Data Grid -->
@@ -55,12 +57,16 @@
                         <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Servis </span>
                     </div> -->
                     <div class="flex gap-2">
-                        <button @click="openEditModal({{ $pkg->toJson() }})" class="text-blue-600 hover:text-blue-800 font-bold px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors text-sm">Edit</button>
-                        <form action="{{ route('admin.services.destroy', $pkg->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Yakin ingin menghapus paket ini?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:text-red-800 font-bold px-3 py-1.5 bg-red-50 hover:bg-red-100 rounded-lg transition-colors text-sm">Hapus</button>
-                        </form>
+                        @if(auth()->user()->role === 'admin')
+                            <button @click="openEditModal({{ $pkg->toJson() }})" class="text-blue-600 hover:text-blue-800 font-bold px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors text-sm">Edit</button>
+                            <form action="{{ route('admin.services.destroy', $pkg->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Yakin ingin menghapus paket ini?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-600 hover:text-red-800 font-bold px-3 py-1.5 bg-red-50 hover:bg-red-100 rounded-lg transition-colors text-sm">Hapus</button>
+                            </form>
+                        @else
+                            <span class="text-xs text-slate-400 italic">Hanya lihat</span>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -78,101 +84,117 @@
         @endif
 
         <!-- CREATE MODAL -->
-        <div x-cloak x-show="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-            <div @click.away="showCreateModal = false" class="bg-white rounded-[24px] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all">
-                <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                    <h3 class="text-lg font-black text-blue-950">Tambah Paket Servis</h3>
-                    <button @click="showCreateModal = false" class="text-slate-400 hover:text-red-500">&times;</button>
+        <template x-teleport="body">
+            <div x-cloak x-show="showCreateModal" class="fixed inset-0 z-[9999]">
+                <!-- Backdrop Blur -->
+                <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-md"></div>
+                
+                <!-- Modal Scroll Container -->
+                <div class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4">
+                    <div @click.away="showCreateModal = false" class="bg-white rounded-[24px] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all relative">
+                        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <h3 class="text-lg font-black text-blue-950">Tambah Paket Servis</h3>
+                            <button @click="showCreateModal = false" class="text-slate-400 hover:text-red-500">&times;</button>
+                        </div>
+                        <form action="{{ route('admin.services.store') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
+                            @csrf
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Foto Paket</label>
+                                    <input type="file" name="image" accept="image/*" class="w-full border-slate-200 rounded-[14px] px-4 py-2 text-xs text-blue-950 bg-slate-50">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tipe Layanan</label>
+                                    <select name="tipe" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 font-medium bg-slate-50 focus:ring-red-500">
+                                        <option value="dengan_part">Jasa + Suku Cadang</option>
+                                        <option value="jasa_saja">Hanya Jasa (Flat)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Nama Paket</label>
+                                <input type="text" name="nama_paket" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50" placeholder="Contoh: Servis CVT">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Deskripsi Singkat</label>
+                                <textarea name="deskripsi" rows="3" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50 resize-none"></textarea>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Estimasi Waktu (Menit)</label>
+                                    <input type="number" name="estimasi_menit" min="1" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Harga Jasa (Rp)</label>
+                                    <input type="number" name="harga_jasa" min="0" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50">
+                                </div>
+                            </div>
+                            <div class="pt-4 flex justify-end gap-2">
+                                <button type="button" @click="showCreateModal = false" class="px-5 py-2.5 rounded-full font-bold text-slate-500 hover:bg-slate-100 transition-colors">Batal</button>
+                                <button type="submit" class="px-5 py-2.5 bg-red-600 text-white rounded-full font-bold hover:bg-red-700 transition-colors shadow-lg">Simpan Paket</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <form action="{{ route('admin.services.store') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
-                    @csrf
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Foto Paket</label>
-                            <input type="file" name="image" accept="image/*" class="w-full border-slate-200 rounded-[14px] px-4 py-2 text-xs text-blue-950 bg-slate-50">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tipe Layanan</label>
-                            <select name="tipe" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 font-medium bg-slate-50 focus:ring-red-500">
-                                <option value="dengan_part">Jasa + Suku Cadang</option>
-                                <option value="jasa_saja">Hanya Jasa (Flat)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Nama Paket</label>
-                        <input type="text" name="nama_paket" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50" placeholder="Contoh: Servis CVT">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Deskripsi Singkat</label>
-                        <textarea name="deskripsi" rows="3" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50 resize-none"></textarea>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Estimasi Waktu (Menit)</label>
-                            <input type="number" name="estimasi_menit" min="1" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Harga Jasa (Rp)</label>
-                            <input type="number" name="harga_jasa" min="0" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50">
-                        </div>
-                    </div>
-                    <div class="pt-4 flex justify-end gap-2">
-                        <button type="button" @click="showCreateModal = false" class="px-5 py-2.5 rounded-full font-bold text-slate-500 hover:bg-slate-100 transition-colors">Batal</button>
-                        <button type="submit" class="px-5 py-2.5 bg-red-600 text-white rounded-full font-bold hover:bg-red-700 transition-colors shadow-lg">Simpan Paket</button>
-                    </div>
-                </form>
             </div>
-        </div>
+        </template>
 
         <!-- EDIT MODAL -->
-        <div x-cloak x-show="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-            <div @click.away="showEditModal = false" class="bg-white rounded-[24px] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all">
-                <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                    <h3 class="text-lg font-black text-blue-950">Edit Paket Servis</h3>
-                    <button @click="showEditModal = false" class="text-slate-400 hover:text-red-500">&times;</button>
+        <template x-teleport="body">
+            <div x-cloak x-show="showEditModal" class="fixed inset-0 z-[9999]">
+                <!-- Backdrop Blur -->
+                <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-md"></div>
+                
+                <!-- Modal Scroll Container -->
+                <div class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4">
+                    <div @click.away="showEditModal = false" class="bg-white rounded-[24px] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all relative">
+                        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <h3 class="text-lg font-black text-blue-950">Edit Paket Servis</h3>
+                            <button @click="showEditModal = false" class="text-slate-400 hover:text-red-500">&times;</button>
+                        </div>
+                        <form :action="'/admin/services/' + editData.id" method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
+                            @csrf
+                            @method('PUT')
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Foto Paket</label>
+                                    <input type="file" name="image" accept="image/*" class="w-full border-slate-200 rounded-[14px] px-4 py-2 text-xs text-blue-950 bg-slate-50">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tipe Layanan</label>
+                                    <select name="tipe" x-model="editData.tipe" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 font-medium bg-slate-50 focus:ring-red-500">
+                                        <option value="dengan_part">Jasa + Suku Cadang</option>
+                                        <option value="jasa_saja">Hanya Jasa (Flat)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Nama Paket</label>
+                                <input type="text" name="nama_paket" x-model="editData.nama_paket" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Deskripsi Singkat</label>
+                                <textarea name="deskripsi" x-model="editData.deskripsi" rows="3" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50 resize-none"></textarea>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Estimasi Waktu (Menit)</label>
+                                    <input type="number" name="estimasi_menit" x-model="editData.estimasi_menit" min="1" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Harga Jasa (Rp)</label>
+                                    <input type="number" name="harga_jasa" x-model="editData.harga_jasa" min="0" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50">
+                                </div>
+                            </div>
+                            <div class="pt-4 flex justify-end gap-2">
+                                <button type="button" @click="showEditModal = false" class="px-5 py-2.5 rounded-full font-bold text-slate-500 hover:bg-slate-100 transition-colors">Batal</button>
+                                <button type="submit" class="px-5 py-2.5 bg-red-600 text-white rounded-full font-bold hover:bg-red-700 transition-colors shadow-lg">Update Paket</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <form :action="'/admin/services/' + editData.id" method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
-                    @csrf
-                    @method('PUT')
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Foto Paket</label>
-                            <input type="file" name="image" accept="image/*" class="w-full border-slate-200 rounded-[14px] px-4 py-2 text-xs text-blue-950 bg-slate-50">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tipe Layanan</label>
-                            <select name="tipe" x-model="editData.tipe" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 font-medium bg-slate-50 focus:ring-red-500">
-                                <option value="dengan_part">Jasa + Suku Cadang</option>
-                                <option value="jasa_saja">Hanya Jasa (Flat)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Nama Paket</label>
-                        <input type="text" name="nama_paket" x-model="editData.nama_paket" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Deskripsi Singkat</label>
-                        <textarea name="deskripsi" x-model="editData.deskripsi" rows="3" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50 resize-none"></textarea>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Estimasi Waktu (Menit)</label>
-                            <input type="number" name="estimasi_menit" x-model="editData.estimasi_menit" min="1" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Harga Jasa (Rp)</label>
-                            <input type="number" name="harga_jasa" x-model="editData.harga_jasa" min="0" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50">
-                        </div>
-                    </div>
-                    <div class="pt-4 flex justify-end gap-2">
-                        <button type="button" @click="showEditModal = false" class="px-5 py-2.5 rounded-full font-bold text-slate-500 hover:bg-slate-100 transition-colors">Batal</button>
-                        <button type="submit" class="px-5 py-2.5 bg-red-600 text-white rounded-full font-bold hover:bg-red-700 transition-colors shadow-lg">Update Paket</button>
-                    </div>
-                </form>
             </div>
-        </div>
+        </template>
 
     </div>
 </x-sidebar-layout>

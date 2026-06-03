@@ -4,7 +4,7 @@
     <!-- Header & Filter -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-            <h2 class="text-2xl font-black text-blue-950">Manajemen Akun</h2>
+            <h2 class="text-2xl font-black text-blue-950">Daftar Pengguna</h2>
             <p class="text-sm text-slate-500 font-medium mt-1">Atur wewenang pengguna (Admin, Mekanik, Pelanggan).</p>
         </div>
         

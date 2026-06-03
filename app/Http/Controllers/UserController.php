@@ -297,6 +297,61 @@ class UserController extends Controller
         return back()->with('success', 'Profil berhasil diperbarui.');
     }
 
+    public function calendar()
+    {
+        $bookings = Booking::with(['user', 'kendaraan', 'paket_servis'])
+            ->whereNotIn('status', ['cancelled', 'rejected'])
+            ->get();
+
+        $bookingsJson = $bookings->map(function($b) {
+            $isOwn = $b->user_id === auth()->id();
+            
+            // Masking name and plate number for other users
+            $platParts = explode(' ', $b->kendaraan->plat_nomor);
+            $maskedPlat = count($platParts) >= 3 
+                ? $platParts[0] . ' *** ' . end($platParts) 
+                : (strlen($b->kendaraan->plat_nomor) > 4 
+                    ? substr($b->kendaraan->plat_nomor, 0, 2) . ' *** ' . substr($b->kendaraan->plat_nomor, -2) 
+                    : '***');
+            
+            $nameParts = explode(' ', $b->user->name);
+            $maskedName = count($nameParts) > 1 
+                ? $nameParts[0] . ' ' . substr(end($nameParts), 0, 1) . '***' 
+                : substr($b->user->name, 0, 3) . '***';
+
+            return [
+                'id' => $b->id,
+                'tanggal' => $b->tanggal,
+                'is_own' => $isOwn,
+                'user_name' => $isOwn ? $b->user->name : $maskedName,
+                'kendaraan' => $isOwn ? $b->kendaraan->merk . ' ' . $b->kendaraan->tipe : $b->kendaraan->merk . ' ' . substr($b->kendaraan->tipe, 0, 2) . '***',
+                'plat_nomor' => $isOwn ? $b->kendaraan->plat_nomor : $maskedPlat,
+                'paket' => $b->paket_servis->count() > 0 ? $b->paket_servis->pluck('nama_paket')->implode(', ') : 'Servis Umum',
+                'status' => $b->status,
+            ];
+        });
+
+        // Load daily schedules to display availability status in calendar cells
+        $schedules = JadwalHarian::orderBy('tanggal', 'asc')->get();
+        $schedulesJson = $schedules->mapWithKeys(function($s) {
+            $sisa = $s->kapasitas_menit - $s->terpakai_menit;
+            return [
+                $s->tanggal => [
+                    'id' => $s->id,
+                    'kapasitas_menit' => $s->kapasitas_menit,
+                    'terpakai_menit' => $s->terpakai_menit,
+                    'sisa_kuota' => max(0, $sisa),
+                    'is_holiday' => $s->kapasitas_menit == 0,
+                    'is_full' => $sisa <= 0 && $s->kapasitas_menit > 0,
+                    'jam_buka' => substr($s->jam_buka, 0, 5),
+                    'jam_tutup' => substr($s->jam_tutup, 0, 5),
+                ]
+            ];
+        });
+
+        return view('user.calendar.index', compact('bookingsJson', 'schedulesJson'));
+    }
+
     // Ini cuma buat nyediain data paket servis ke JavaScript pas user pilih paket di modal booking (format JSON)
     public function getPackages()
     {

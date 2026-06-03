@@ -77,6 +77,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/booking/{booking}/invoice', [UserController::class, 'downloadInvoice'])->name('booking.invoice'); // Download invoice PDF
         
         Route::get('/history', [UserController::class, 'history'])->name('history'); // Liat riwayat servis lama
+        Route::get('/calendar', [UserController::class, 'calendar'])->name('calendar.index'); // Kalender Booking
         
         Route::get('/settings', [UserController::class, 'settings'])->name('settings.index'); // Halaman pengaturan profil
         Route::post('/settings', [UserController::class, 'updateSettings'])->name('settings.update'); // Simpan perubahan profil
@@ -123,6 +124,10 @@ Route::middleware('auth')->group(function () {
         // Kelola daftar akun pengguna (cuma buat Superadmin)
         Route::get('/users', [AdminController::class, 'users'])->name('users.index')->middleware('role:superadmin');
         Route::patch('/users/{user}/role', [AdminController::class, 'updateUserRole'])->name('users.update_role')->middleware('role:superadmin');
+
+        // Rekap pendapatan dan jumlah booking per bulan (cuma buat Superadmin)
+        Route::get('/recap', [AdminController::class, 'recap'])->name('recap.index')->middleware('role:superadmin');
+        Route::get('/recap/excel', [AdminController::class, 'exportRecapExcel'])->name('recap.excel')->middleware('role:superadmin');
     });
 });
 

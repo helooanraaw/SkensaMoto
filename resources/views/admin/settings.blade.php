@@ -4,7 +4,7 @@
     <div class="max-w-4xl mx-auto space-y-6">
         <!-- Header -->
         <div class="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm">
-            <h2 class="text-xl font-black text-blue-950">Pengaturan Bengkel</h2>
+            <h2 class="text-xl font-black text-blue-950">Identitas & Kontak Bengkel</h2>
             <p class="text-sm text-slate-500 font-medium">Sesuaikan identitas dan informasi kontak bengkel Anda.</p>
         </div>
 

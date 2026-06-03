@@ -1,7 +1,7 @@
 <x-sidebar-layout>
     <x-slot name="title">Jadwal Operasional Harian</x-slot>
 
-    <div x-data="{ showCreateModal: false }" class="space-y-6">
+    <div x-data="{ showCreateModal: false }" x-effect="showCreateModal ? document.body.classList.add('overflow-hidden') : document.body.classList.remove('overflow-hidden')" class="space-y-6">
 
         <!-- Header Actions -->
         <div class="flex justify-between items-center bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm">
@@ -9,8 +9,8 @@
                 <h2 class="text-xl font-black text-blue-950">Pengaturan Jadwal & Kapasitas</h2>
                 <p class="text-sm text-slate-500 font-medium">Buka jadwal per hari dan tentukan kuota maksimal menit pengerjaan.</p>
             </div>
-            @if(in_array(auth()->user()->role, ['superadmin', 'admin']))
-            <button @click="showCreateModal = true" class="px-5 py-2.5 bg-red-600 text-white rounded-full text-sm font-bold shadow-md hover:bg-red-700 hover:-translate-y-0.5 transition-all">
+            @if(auth()->user()->role === 'admin')
+            <button @click="showCreateModal = true" class="px-5 py-2.5 bg-red-600 text-white rounded-full text-sm font-bold shadow-md hover:bg-red-700/90 transition-all">
                 + Set Jadwal Baru
             </button>
             @endif
@@ -57,7 +57,7 @@
                 
                 <div class="bg-slate-50 px-6 py-4 flex justify-between items-center border-t border-slate-100 mt-auto">
                     <span class="text-xs font-bold text-slate-500">ID: #{{ $sch->id }}</span>
-                    @if(in_array(auth()->user()->role, ['superadmin', 'admin']))
+                    @if(auth()->user()->role === 'admin')
                     <form action="{{ route('admin.schedules.destroy', $sch->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Menghapus jadwal bisa mempengaruhi booking yang sudah masuk pada tanggal ini. Lanjutkan?');">
                         @csrf
                         @method('DELETE')
@@ -80,40 +80,48 @@
         @endif
 
         <!-- CREATE MODAL -->
-        <div x-cloak x-show="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-            <div @click.away="showCreateModal = false" class="bg-white rounded-[24px] shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
-                <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                    <h3 class="text-lg font-black text-blue-950">Set Jadwal Baru</h3>
-                    <button @click="showCreateModal = false" class="text-slate-400 hover:text-red-500">&times;</button>
+        <template x-teleport="body">
+            <div x-cloak x-show="showCreateModal" class="fixed inset-0 z-[9999]">
+                <!-- Backdrop Blur -->
+                <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-md"></div>
+                
+                <!-- Modal Scroll Container -->
+                <div class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4">
+                    <div @click.away="showCreateModal = false" class="bg-white rounded-[24px] shadow-2xl w-full max-w-md overflow-hidden transform transition-all relative">
+                        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <h3 class="text-lg font-black text-blue-950">Set Jadwal Baru</h3>
+                            <button @click="showCreateModal = false" class="text-slate-400 hover:text-red-500">&times;</button>
+                        </div>
+                        <form action="{{ route('admin.schedules.store') }}" method="POST" class="p-6 space-y-4">
+                            @csrf
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tanggal</label>
+                                <input type="date" name="tanggal" required min="{{ date('Y-m-d') }}" class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Jam Buka</label>
+                                    <input type="time" name="jam_buka" value="08:00" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Jam Tutup</label>
+                                    <input type="time" name="jam_tutup" value="16:00" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Kapasitas Maksimal (Menit)</label>
+                                <input type="number" name="kapasitas_menit" min="60" value="480" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50">
+                                <p class="text-xs text-slate-400 mt-1">Misal: 480 menit (8 Jam operasional dengan 1 mekanik)</p>
+                            </div>
+                            <div class="pt-4 flex justify-end gap-2">
+                                <button type="button" @click="showCreateModal = false" class="px-5 py-2.5 rounded-full font-bold text-slate-500 hover:bg-slate-100 transition-colors">Batal</button>
+                                <button type="submit" class="px-5 py-2.5 bg-red-600 text-white rounded-full font-bold hover:bg-red-700 transition-colors shadow-lg">Simpan Jadwal</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <form action="{{ route('admin.schedules.store') }}" method="POST" class="p-6 space-y-4">
-                    @csrf
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tanggal</label>
-                        <input type="date" name="tanggal" required min="{{ date('Y-m-d') }}" class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50">
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Jam Buka</label>
-                            <input type="time" name="jam_buka" value="08:00" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Jam Tutup</label>
-                            <input type="time" name="jam_tutup" value="16:00" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Kapasitas Maksimal (Menit)</label>
-                        <input type="number" name="kapasitas_menit" min="60" value="480" required class="w-full border-slate-200 rounded-[14px] px-4 py-2.5 text-blue-950 focus:ring-red-500 focus:border-red-500 font-medium bg-slate-50">
-                        <p class="text-xs text-slate-400 mt-1">Misal: 480 menit (8 Jam operasional dengan 1 mekanik)</p>
-                    </div>
-                    <div class="pt-4 flex justify-end gap-2">
-                        <button type="button" @click="showCreateModal = false" class="px-5 py-2.5 rounded-full font-bold text-slate-500 hover:bg-slate-100 transition-colors">Batal</button>
-                        <button type="submit" class="px-5 py-2.5 bg-red-600 text-white rounded-full font-bold hover:bg-red-700 transition-colors shadow-lg">Simpan Jadwal</button>
-                    </div>
-                </form>
             </div>
-        </div>
+        </template>
 
     </div>
 </x-sidebar-layout>

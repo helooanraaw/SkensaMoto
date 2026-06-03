@@ -88,6 +88,10 @@ class AdminController extends Controller
     // ALGORITHM 1: Smart Slot Booking
     public function approveBooking(Request $request, Booking $booking)
     {
+        if (auth()->user()->role === 'superadmin') {
+            return back()->with('error', 'Superadmin hanya memiliki akses lihat (read-only) untuk fitur ini.');
+        }
+
         $request->validate([
             'estimasi_total_menit' => 'required|integer|min:1',
         ]);
@@ -142,6 +146,10 @@ class AdminController extends Controller
     // ALGORITHM 2: Auto-Deduct Inventory & Invoicing
     public function completeBooking(Request $request, Booking $booking)
     {
+        if (auth()->user()->role === 'superadmin') {
+            return back()->with('error', 'Superadmin hanya memiliki akses lihat (read-only) untuk fitur ini.');
+        }
+
         if ($booking->status !== 'in_progress') {
             return back()->with('error', 'Booking harus dalam status in_progress.');
         }
@@ -197,6 +205,10 @@ class AdminController extends Controller
 
     public function updatePaymentStatus(Request $request, Booking $booking)
     {
+        if (auth()->user()->role === 'superadmin') {
+            return back()->with('error', 'Superadmin hanya memiliki akses lihat (read-only) untuk fitur ini.');
+        }
+
         $request->validate([
             'payment_status' => 'required|in:unpaid,paid',
         ]);
@@ -217,6 +229,10 @@ class AdminController extends Controller
 
     public function sendQuotation(Request $request, Booking $booking)
     {
+        if (auth()->user()->role === 'superadmin') {
+            return back()->with('error', 'Superadmin hanya memiliki akses lihat (read-only) untuk fitur ini.');
+        }
+
         $request->validate([
             'catatan_kerusakan' => 'required|string',
             'barang_id' => 'array',
@@ -262,6 +278,10 @@ class AdminController extends Controller
 
     public function startBooking(Booking $booking)
     {
+        if (auth()->user()->role === 'superadmin') {
+            return back()->with('error', 'Superadmin hanya memiliki akses lihat (read-only) untuk fitur ini.');
+        }
+
         $booking->update([
             'status' => 'in_progress', 
             'jam_mulai' => now()->format('H:i:s'),
@@ -273,6 +293,10 @@ class AdminController extends Controller
 
     public function rejectBooking(Booking $booking)
     {
+        if (auth()->user()->role === 'superadmin') {
+            return back()->with('error', 'Superadmin hanya memiliki akses lihat (read-only) untuk fitur ini.');
+        }
+
         $booking->update(['status' => 'rejected']);
         ProgresServis::create(['booking_id' => $booking->id, 'status_log' => 'Booking ditolak oleh admin.']);
         return back()->with('success', 'Booking ditolak.');
@@ -281,6 +305,10 @@ class AdminController extends Controller
     // --- INVENTORY CRUD ---
     public function storeInventory(Request $request)
     {
+        if (auth()->user()->role === 'superadmin') {
+            return back()->with('error', 'Superadmin hanya memiliki akses lihat (read-only) untuk fitur ini.');
+        }
+
         $validated = $request->validate([
             'nama_barang' => 'required|string|max:255',
             'satuan' => 'required|string|max:50',
@@ -293,6 +321,10 @@ class AdminController extends Controller
 
     public function updateInventory(Request $request, Inventory $inventory)
     {
+        if (auth()->user()->role === 'superadmin') {
+            return back()->with('error', 'Superadmin hanya memiliki akses lihat (read-only) untuk fitur ini.');
+        }
+
         $validated = $request->validate([
             'nama_barang' => 'required|string|max:255',
             'satuan' => 'required|string|max:50',
@@ -305,6 +337,16 @@ class AdminController extends Controller
 
     public function destroyInventory(Inventory $inventory)
     {
+        if (auth()->user()->role === 'superadmin') {
+            return back()->with('error', 'Superadmin hanya memiliki akses lihat (read-only) untuk fitur ini.');
+        }
+
+        $hasUsage = DB::table('pemakaian_barang')->where('barang_id', $inventory->id)->exists();
+        
+        if ($hasUsage) {
+            return back()->with('error', 'Barang tidak dapat dihapus karena sudah tercatat dalam penggunaan sparepart servis pelanggan.');
+        }
+
         $inventory->delete();
         return back()->with('success', 'Barang berhasil dihapus.');
     }
@@ -312,6 +354,10 @@ class AdminController extends Controller
     // --- SERVICES CRUD ---
     public function storeService(Request $request)
     {
+        if (auth()->user()->role === 'superadmin') {
+            return back()->with('error', 'Superadmin hanya memiliki akses lihat (read-only) untuk fitur ini.');
+        }
+
         $validated = $request->validate([
             'nama_paket' => 'required|string|max:255',
             'tipe' => 'required|in:jasa_saja,dengan_part',
@@ -333,6 +379,10 @@ class AdminController extends Controller
 
     public function updateService(Request $request, PaketServis $paketServis)
     {
+        if (auth()->user()->role === 'superadmin') {
+            return back()->with('error', 'Superadmin hanya memiliki akses lihat (read-only) untuk fitur ini.');
+        }
+
         $validated = $request->validate([
             'nama_paket' => 'required|string|max:255',
             'tipe' => 'required|in:jasa_saja,dengan_part',
@@ -359,6 +409,21 @@ class AdminController extends Controller
 
     public function destroyService(PaketServis $paketServis)
     {
+        if (auth()->user()->role === 'superadmin') {
+            return back()->with('error', 'Superadmin hanya memiliki akses lihat (read-only) untuk fitur ini.');
+        }
+
+        $hasUsage = DB::table('booking_detail')->where('paket_id', $paketServis->id)->exists();
+        
+        if ($hasUsage) {
+            return back()->with('error', 'Paket servis tidak dapat dihapus karena sudah pernah dipesan dalam riwayat booking pelanggan.');
+        }
+
+        // Hapus file foto jika ada
+        if ($paketServis->image_path && file_exists(public_path($paketServis->image_path))) {
+            unlink(public_path($paketServis->image_path));
+        }
+
         $paketServis->delete();
         return back()->with('success', 'Paket Servis berhasil dihapus.');
     }
@@ -366,6 +431,10 @@ class AdminController extends Controller
     // --- SCHEDULES CRUD ---
     public function storeSchedule(Request $request)
     {
+        if (auth()->user()->role === 'superadmin') {
+            return back()->with('error', 'Superadmin hanya memiliki akses lihat (read-only) untuk fitur ini.');
+        }
+
         $validated = $request->validate([
             'tanggal' => 'required|date|unique:jadwal_harian,tanggal',
             'jam_buka' => 'required|date_format:H:i',
@@ -378,6 +447,17 @@ class AdminController extends Controller
 
     public function destroySchedule(JadwalHarian $jadwalHarian)
     {
+        if (auth()->user()->role === 'superadmin') {
+            return back()->with('error', 'Superadmin hanya memiliki akses lihat (read-only) untuk fitur ini.');
+        }
+
+        // Cek apakah jadwal ini sudah memiliki booking terasosiasi
+        $hasBookings = \App\Models\Booking::where('id_jadwal', $jadwalHarian->id)->exists();
+        
+        if ($hasBookings) {
+            return back()->with('error', 'Jadwal gagal dihapus karena sudah memiliki data booking pelanggan yang terdaftar pada tanggal tersebut.');
+        }
+
         $jadwalHarian->delete();
         return back()->with('success', 'Jadwal berhasil dihapus.');
     }
@@ -447,5 +527,83 @@ class AdminController extends Controller
         $user->update(['role' => $request->role]);
 
         return back()->with('success', "Role {$user->name} berhasil diubah menjadi " . ucfirst($request->role) . ".");
+    }
+
+    public function recap()
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403);
+        }
+
+        $allBookings = Booking::orderBy('tanggal', 'asc')->get();
+        $grouped = $allBookings->groupBy(function($booking) {
+            return \Carbon\Carbon::parse($booking->tanggal)->format('Y-m');
+        });
+
+        $recapData = $grouped->map(function($monthBookings, $key) {
+            $completed = $monthBookings->where('status', 'completed');
+            $revenue = $completed->sum('total_harga');
+
+            return [
+                'month' => $key,
+                'month_label' => \Carbon\Carbon::parse($key . '-01')->translatedFormat('F Y'),
+                'total_bookings' => $monthBookings->count(),
+                'completed_bookings' => $completed->count(),
+                'pending_bookings' => $monthBookings->where('status', 'pending')->count(),
+                'active_bookings' => $monthBookings->whereIn('status', ['approved', 'in_progress'])->count(),
+                'cancelled_bookings' => $monthBookings->whereIn('status', ['cancelled', 'rejected'])->count(),
+                'revenue' => $revenue,
+            ];
+        })->values()->sortByDesc('month');
+
+        // Chart data
+        $chartData = $recapData->sortBy('month');
+        $chartMonths = [];
+        $chartRevenue = [];
+        $chartBookingCount = [];
+
+        foreach ($chartData as $data) {
+            $chartMonths[] = \Carbon\Carbon::parse($data['month'] . '-01')->translatedFormat('M Y');
+            $chartRevenue[] = $data['revenue'];
+            $chartBookingCount[] = $data['total_bookings'];
+        }
+
+        return view('admin.recap.index', compact('recapData', 'chartMonths', 'chartRevenue', 'chartBookingCount'));
+    }
+
+    public function exportRecapExcel()
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403);
+        }
+
+        $allBookings = Booking::orderBy('tanggal', 'asc')->get();
+        $grouped = $allBookings->groupBy(function($booking) {
+            return \Carbon\Carbon::parse($booking->tanggal)->format('Y-m');
+        });
+
+        $recapData = $grouped->map(function($monthBookings, $key) {
+            $completed = $monthBookings->where('status', 'completed');
+            $revenue = $completed->sum('total_harga');
+
+            return [
+                'month' => $key,
+                'month_label' => \Carbon\Carbon::parse($key . '-01')->translatedFormat('F Y'),
+                'total_bookings' => $monthBookings->count(),
+                'completed_bookings' => $completed->count(),
+                'pending_bookings' => $monthBookings->where('status', 'pending')->count(),
+                'active_bookings' => $monthBookings->whereIn('status', ['approved', 'in_progress'])->count(),
+                'cancelled_bookings' => $monthBookings->whereIn('status', ['cancelled', 'rejected'])->count(),
+                'revenue' => $revenue,
+            ];
+        })->values()->sortByDesc('month');
+
+        $filename = "rekap_pendapatan_booking_" . date('Ymd') . ".xls";
+
+        return response(view('admin.recap.excel', compact('recapData')))
+            ->header('Content-Type', 'application/vnd.ms-excel')
+            ->header('Content-Disposition', "attachment; filename=\"$filename\"")
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 }

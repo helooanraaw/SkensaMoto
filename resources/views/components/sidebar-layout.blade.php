@@ -23,7 +23,7 @@
 <body class="bg-slate-50 text-blue-950 antialiased selection:bg-red-100 selection:text-red-900" x-data="{ sidebarOpen: false }">
 
     <!-- Mobile sidebar backdrop -->
-    <div x-cloak x-show="sidebarOpen" class="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm lg:hidden" @click="sidebarOpen = false"></div>
+    <div x-cloak x-show="sidebarOpen" class="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-md lg:hidden" @click="sidebarOpen = false"></div>
 
     <!-- Sidebar -->
     <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-200 transition-transform duration-300 lg:translate-x-0 flex flex-col shadow-sm">
@@ -112,6 +112,10 @@
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                     Manajemen Akun
                 </a>
+                <a href="{{ route('admin.recap.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold {{ request()->routeIs('admin.recap.*') ? 'bg-red-50 text-red-600' : 'text-slate-500 hover:bg-slate-50 hover:text-blue-950' }}">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2"/></svg>
+                    Rekap Keuangan
+                </a>
                 <a href="{{ route('admin.settings.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold {{ request()->routeIs('admin.settings.*') ? 'bg-red-50 text-red-600' : 'text-slate-500 hover:bg-slate-50 hover:text-blue-950' }}">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     Pengaturan
@@ -130,6 +134,10 @@
                     @if($pelangganBadge > 0)
                         <span class="bg-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">{{ $pelangganBadge }}</span>
                     @endif
+                </a>
+                <a href="{{ route('user.calendar.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold {{ request()->routeIs('user.calendar.*') ? 'bg-red-50 text-red-600' : 'text-slate-500 hover:bg-slate-50 hover:text-blue-950' }}">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    Kalender Booking
                 </a>
                 <a href="{{ route('user.history') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold {{ request()->routeIs('user.history') ? 'bg-red-50 text-red-600' : 'text-slate-500 hover:bg-slate-50 hover:text-blue-950' }}">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -260,5 +268,96 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     {{ $scripts ?? '' }}
+
+    <!-- Global Custom Confirm Modal -->
+    <template x-teleport="body">
+        <div x-data="{ 
+                open: false, 
+                message: '', 
+                onConfirm: null,
+                init() {
+                    window.showCustomConfirm = (msg, callback) => {
+                        this.message = msg;
+                        this.onConfirm = callback;
+                        this.open = true;
+                    }
+                }
+            }"
+            x-cloak
+            x-show="open" 
+            class="fixed inset-0 z-[99999]"
+        >
+            <!-- Backdrop Blur -->
+            <div x-show="open" 
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="fixed inset-0 bg-slate-900/60 backdrop-blur-md"
+            ></div>
+
+            <!-- Modal Content -->
+            <div class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4">
+                <div x-show="open"
+                     x-transition:enter="ease-out duration-300"
+                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                     x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                     x-transition:leave="ease-in duration-200"
+                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                     class="bg-white rounded-[28px] shadow-2xl w-full max-w-sm overflow-hidden p-6 relative border border-slate-100"
+                >
+                    <div class="text-center space-y-4">
+                        <div>
+                            <h3 class="text-lg font-black text-blue-950">Konfirmasi Tindakan</h3>
+                            <p class="text-sm text-slate-500 font-medium mt-2 leading-relaxed" x-text="message"></p>
+                        </div>
+
+                        <div class="flex gap-2 pt-2">
+                            <button type="button" @click="open = false" class="flex-1 py-3 border border-slate-200 hover:bg-slate-50 text-slate-500 font-bold rounded-full text-sm transition-colors">
+                                Batal
+                            </button>
+                            <button type="button" @click="open = false; if(onConfirm) onConfirm();" class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-full text-sm transition-colors shadow-lg shadow-red-600/25">
+                                Ya, Lanjutkan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        // Listen in capturing phase to intercept before inline onsubmit runs
+        document.addEventListener('submit', function(e) {
+            const form = e.target;
+            const onsubmitAttr = form.getAttribute('onsubmit');
+            if (onsubmitAttr && onsubmitAttr.includes('confirm(')) {
+                if (!form.dataset.confirmed) {
+                    e.preventDefault();
+                    e.stopPropagation(); // Stop target phase propagation to prevent inline onsubmit confirm() from executing
+                    
+                    // Match single or double quotes
+                    const match = onsubmitAttr.match(/confirm\(['"](.*?)['"]\)/);
+                    const message = match ? match[1] : 'Apakah Anda yakin ingin melanjutkan tindakan ini?';
+                    
+                    if (window.showCustomConfirm) {
+                        window.showCustomConfirm(message, function() {
+                            form.dataset.confirmed = 'true';
+                            form.submit(); // Submit programmatically
+                        });
+                    } else {
+                        // Fallback to browser confirm if Alpine isn't ready
+                        if (confirm(message)) {
+                            form.dataset.confirmed = 'true';
+                            form.submit();
+                        }
+                    }
+                }
+            }
+        }, true); // Capturing phase is KEY here
+    </script>
 </body>
 </html>
