@@ -330,137 +330,155 @@
     </script>
 
     <!-- Services Section -->
-    <div id="services" class="py-20 bg-white border-t border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <span class="text-red-600 font-bold uppercase tracking-wider text-sm">Fasilitas Bengkel</span>
-                <h2 class="text-3xl font-extrabold text-blue-950 mt-2">Daftar Layanan Standar Dealer</h2>
-                <p class="mt-3 text-blue-950 max-w-2xl mx-auto font-medium">Kami mengadopsi standar operasional Dealer Resmi. Sparepart yang digunakan adalah suku cadang orisinil dan mekanik bekerja menggunakan SOP industri.</p>
-            </div>
+    <!-- Services Section -->
+<div id="services" class="py-20 bg-white border-t border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <span class="text-red-600 font-bold uppercase tracking-wider text-sm">Fasilitas Bengkel</span>
+            <h2 class="text-3xl font-extrabold text-blue-950 mt-2">Daftar Layanan Standar Dealer</h2>
+            <p class="mt-3 text-blue-950 max-w-2xl mx-auto font-medium">Kami mengadopsi standar operasional Dealer Resmi. Sparepart yang digunakan adalah suku cadang orisinil dan mekanik bekerja menggunakan SOP industri.</p>
+        </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-                @forelse($packages as $paket)
-                    @php
-                        $isPopular = $paket->bookings_count > 0 && $paket->bookings_count >= $maxBookings;
-                        
-                        // Map image based on package name (Placeholder for now)
-                        $image = 'https://images.unsplash.com/photo-1558981403-c5f91dbcf9ad?q=80&w=800&auto=format&fit=crop'; // Default
-                        if (stripos($paket->nama_paket, 'oli') !== false) {
-                            $image = 'https://images.unsplash.com/photo-1610647752706-3bb12232b3ab?q=80&w=800&auto=format&fit=crop';
-                        } elseif (stripos($paket->nama_paket, 'lengkap') !== false || stripos($paket->nama_paket, 'berat') !== false) {
-                            $image = 'https://images.unsplash.com/photo-1599812411566-b939591992ec?q=80&w=800&auto=format&fit=crop';
-                        } elseif (stripos($paket->nama_paket, 'ringan') !== false || stripos($paket->nama_paket, 'reguler') !== false) {
-                            $image = 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=800&auto=format&fit=crop';
-                        }
-                    @endphp
-                    <div class="bg-white border {{ $isPopular ? 'border-red-600 ring-1 ring-red-600' : 'border-slate-200' }} rounded-xl overflow-hidden transition-all duration-300 group flex flex-col">
-                        
-                        <!-- Image Area -->
-                        <div class="relative h-44 overflow-hidden bg-slate-100">
-                            <img src="{{ $paket->image_path ? asset($paket->image_path) : 'https://images.unsplash.com/photo-1558981403-c5f91dbcf9ad?q=80&w=800&auto=format&fit=crop' }}" 
-                                 alt="{{ $paket->nama_paket }}" 
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                            <div class="absolute inset-0 bg-gradient-to-t from-blue-950/60 to-transparent"></div>
-                            @if($isPopular)
-                                <div class="absolute top-3 right-3 bg-red-600 text-white text-[9px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-wider">Terpopuler</div>
-                            @endif
-                            <div class="absolute bottom-3 left-4">
-                                <h3 class="text-lg font-extrabold text-white leading-tight">{{ $paket->nama_paket }}</h3>
-                            </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+            @forelse($packages as $paket)
+                @php
+                    $isPopular = $paket->bookings_count > 0 && $paket->bookings_count >= $maxBookings;
+                    
+                    // Map image based on package name (Placeholder for now)
+                    $image = 'https://images.unsplash.com/photo-1558981403-c5f91dbcf9ad?q=80&w=800&auto=format&fit=crop'; // Default
+                    if (stripos($paket->nama_paket, 'oli') !== false) {
+                        $image = 'https://images.unsplash.com/photo-1610647752706-3bb12232b3ab?q=80&w=800&auto=format&fit=crop';
+                    } elseif (stripos($paket->nama_paket, 'lengkap') !== false || stripos($paket->nama_paket, 'berat') !== false) {
+                        $image = 'https://images.unsplash.com/photo-1599812411566-b939591992ec?q=80&w=800&auto=format&fit=crop';
+                    } elseif (stripos($paket->nama_paket, 'ringan') !== false || stripos($paket->nama_paket, 'reguler') !== false) {
+                        $image = 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=800&auto=format&fit=crop';
+                    }
+                @endphp
+                <div class="bg-white border {{ $isPopular ? 'border-red-600 ring-1 ring-red-600' : 'border-slate-200' }} rounded-xl overflow-hidden transition-all duration-300 group flex flex-col h-full">
+                    
+                    <!-- Image Area (Fixed Height) -->
+                    <div class="relative h-44 overflow-hidden bg-slate-100 flex-shrink-0">
+                        <img src="{{ $paket->image_path ? asset($paket->image_path) : 'https://images.unsplash.com/photo-1558981403-c5f91dbcf9ad?q=80&w=800&auto=format&fit=crop' }}" 
+                             alt="{{ $paket->nama_paket }}" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-blue-950/60 to-transparent"></div>
+                        @if($isPopular)
+                            <div class="absolute top-3 right-3 bg-red-600 text-white text-[9px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-wider">Terpopuler</div>
+                        @endif
+                        <div class="absolute bottom-3 left-4">
+                            <h3 class="text-lg font-extrabold text-white leading-tight">{{ $paket->nama_paket }}</h3>
                         </div>
+                    </div>
 
-                        <div class="p-6">
-                            <p class="text-[10px] font-black text-red-600 uppercase tracking-widest mb-3">SOP Bengkel Resmi</p>
-                            
-                            <p class="text-slate-600 text-xs leading-relaxed mb-6 font-medium">
-                                {{ $paket->deskripsi ?? 'Pemeriksaan menyeluruh sesuai standar industri untuk memastikan performa motor tetap prima.' }}
-                            </p>
-                            
-                            <div class="mt-auto pt-5 border-t border-slate-100 flex flex-col gap-4">
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div class="flex flex-col">
-                                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                                            {{ $paket->tipe === 'jasa_saja' ? 'Harga Paket' : 'Biaya Jasa' }}
-                                        </span>
-                                        @if($paket->harga_jasa == 0)
-                                            <span class="text-base font-black text-emerald-600 uppercase">Gratis</span>
-                                        @else
-                                            <span class="text-lg font-black text-blue-950">Rp {{ number_format($paket->harga_jasa, 0, ',', '.') }}</span>
-                                        @endif
-                                    </div>
-                                    <div class="flex flex-col border-l border-slate-100 pl-4">
-                                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Material & Tambahan</span>
-                                        @if($paket->tipe === 'jasa_saja')
-                                            <span class="text-[10px] font-bold text-emerald-600 italic leading-tight">Sudah Termasuk</span>
-                                        @else
-                                            <span class="text-[10px] font-bold text-slate-600 italic leading-tight">Sesuai Kebutuhan</span>
-                                        @endif
-                                    </div>
+                    <!-- Content Area (Flexible, but will push footer down) -->
+                    <div class="p-6 flex flex-col flex-1">
+                        <p class="text-[10px] font-black text-red-600 uppercase tracking-widest mb-3 flex-shrink-0">SOP Bengkel Resmi</p>
+                        
+                        <!-- Deskripsi dengan fixed height agar konsisten -->
+                        <div class="text-slate-600 text-xs leading-relaxed font-medium mb-6 min-h-[80px]">
+                            <p>{{ $paket->deskripsi ?? 'Pemeriksaan menyeluruh sesuai standar industri untuk memastikan performa motor tetap prima.' }}</p>
+                        </div>
+                        
+                        <!-- Footer Section (akan selalu di bawah) -->
+                        <div class="mt-auto pt-5 border-t border-slate-100 flex flex-col gap-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                                        {{ $paket->tipe === 'jasa_saja' ? 'Harga Paket' : 'Biaya Jasa' }}
+                                    </span>
+                                    @if($paket->harga_jasa == 0)
+                                        <span class="text-base font-black text-emerald-600 uppercase">Gratis</span>
+                                    @else
+                                        <span class="text-lg font-black text-blue-950">Rp {{ number_format($paket->harga_jasa, 0, ',', '.') }}</span>
+                                    @endif
                                 </div>
-                                
-                                <a href="/login" class="block w-full text-center py-2.5 bg-blue-950 text-white group-hover:bg-red-600 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all">
-                                    Booking Sekarang
-                                </a>
+                                <div class="flex flex-col border-l border-slate-100 pl-4">
+                                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Material & Tambahan</span>
+                                    @if($paket->tipe === 'jasa_saja')
+                                        <span class="text-[10px] font-bold text-emerald-600 italic leading-tight">Sudah Termasuk</span>
+                                    @else
+                                        <span class="text-[10px] font-bold text-slate-600 italic leading-tight">Sesuai Kebutuhan</span>
+                                    @endif
+                                </div>
                             </div>
+                            
+                            <a href="/login" class="block w-full text-center py-2.5 bg-blue-950 text-white group-hover:bg-red-600 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all">
+                                Booking Sekarang
+                            </a>
                         </div>
                     </div>
-                @empty
-                    <div class="col-span-3 py-16 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
-                        <p class="text-slate-400 font-bold italic">Belum ada paket servis tersedia.</p>
-                    </div>
-                @endforelse
-            </div>
-            
-            <div class="mt-10 text-center">
-                <p class="text-sm text-blue-950 bg-red-50 inline-block px-6 py-3 rounded-2xl border border-red-100 font-medium max-w-4xl leading-relaxed">
-                    <span class="font-black text-red-600 uppercase tracking-wider text-xs block mb-1">Catatan Penting</span>
-                    Harga yang tertera di atas adalah <strong class="font-bold">estimasi biaya jasa dasar</strong>. Total biaya akhir (termasuk harga oli, jenis sparepart, dan tingkat kesulitan bongkar-pasang tiap jenis motor) akan dikonfirmasikan secara transparan oleh mekanik kami <strong class="font-bold">sebelum pengerjaan dimulai</strong>.
-                </p>
-            </div>
+                </div>
+            @empty
+                <div class="col-span-3 py-16 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                    <p class="text-slate-400 font-bold italic">Belum ada paket servis tersedia.</p>
+                </div>
+            @endforelse
+        </div>
+        
+        <div class="mt-10 text-center">
+            <p class="text-sm text-blue-950 bg-red-50 inline-block px-6 py-3 rounded-2xl border border-red-100 font-medium max-w-4xl leading-relaxed">
+                <span class="font-black text-red-600 uppercase tracking-wider text-xs block mb-1">Catatan Penting</span>
+                Harga yang tertera di atas adalah <strong class="font-bold">estimasi biaya jasa dasar</strong>. Total biaya akhir (termasuk harga oli, jenis sparepart, dan tingkat kesulitan bongkar-pasang tiap jenis motor) akan dikonfirmasikan secara transparan oleh mekanik kami <strong class="font-bold">sebelum pengerjaan dimulai</strong>.
+            </p>
         </div>
     </div>
-
-    <!-- Footer -->
-    <footer class="bg-red- border-t-4 border-red-600 pt-16 pb-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-10">
-                <div>
-                    <div class="flex items-center gap-2 mb-4">
-                        <img src="{{ asset('images/MotoSkensaLogo1.png') }}" alt="MotoSkensa Logo" class="h-8 w-auto" />
-                        <span class="font-extrabold text-xl tracking-tight text-red-600">Skensa<span class="text-blue-950">Moto</span></span>
+</div>
+<!-- Footer -->
+        <footer class="bg-slate-900 pt-12 pb-6">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                    <!-- Logo & Description -->
+                    <div>
+                        <div class="flex items-center gap-2 mb-3">
+                            <img src="{{ asset('images/MotoSkensaLogo1.png') }}" alt="MotoSkensa Logo" class="h-8 w-auto" />
+                            <span class="font-extrabold text-lg tracking-tight text-white">Skensa<span class="text-red-500">Moto</span></span>
+                        </div>
+                        <p class="text-slate-400 text-sm">Jurusan Teknik Sepeda Motor (TSM)<br>SMK Negeri 1 Denpasar</p>
                     </div>
-                    <p class="text-blue-950 text-sm leading-relaxed font-bold mb-2">Bengkel Motor Teknologi Sekolah</p>
-                    <p class="text-blue-950 text-sm leading-relaxed font-medium">Jurusan Teknik Sepeda Motor (TSM)<br>SMK Negeri 1 Denpasar</p>
-                </div>
-                <div>
-                    <h4 class="text-blue-950 font-bold mb-4 uppercase text-sm tracking-wider">Lokasi Bengkel</h4>
-                    <ul class="text-blue-950 space-y-3 text-sm font-medium">
-                        <li class="flex items-start gap-2">
-                            <svg class="h-5 w-5 text-red-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            <span>Jl. H.O.S. Cokroaminoto No.84, Ubung, Kec. Denpasar Utara, Kota Denpasar, Bali 80116</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg class="h-5 w-5 text-red-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                    
+                    <!-- Location -->
+                    <div>
+                        <h4 class="text-white font-bold mb-3 text-xs uppercase tracking-wider flex items-center gap-2">
+                            Lokasi
+                        </h4>
+                        <div class="flex items-start gap-2 text-slate-400 text-sm leading-relaxed mb-2">
+                            <svg class="w-3 h-3 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                <path stroke-linecap="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            <span>Jl. H.O.S. Cokroaminoto No.84, Ubung, Denpasar Utara, Bali 80116</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-slate-400 text-sm">
+                            <svg class="w-3 h-3 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                            </svg>
                             <span>(0361) 422401</span>
-                        </li>
-                    </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Hours -->
+                    <div>
+                        <h4 class="text-white font-bold mb-3 text-xs uppercase tracking-wider flex items-center gap-2">
+                            <svg class="w-3 h-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Jam Operasional
+                        </h4>
+                        <div class="space-y-1 text-sm">
+                            <div class="flex justify-between"><span class="text-slate-400">Senin - Kamis</span><span class="text-white font-medium">08:00 - 15:30</span></div>
+                            <div class="flex justify-between"><span class="text-slate-400">Jumat</span><span class="text-white font-medium">08:00 - 11:30</span></div>
+                            <div class="flex justify-between"><span class="text-slate-400">Sabtu - Minggu</span><span class="text-red-500 font-medium">Libur</span></div>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <h4 class="text-blue-950 font-bold mb-4 uppercase text-sm tracking-wider">Jam Praktik & Pelayanan</h4>
-                    <ul class="text-blue-950 text-sm space-y-2 font-medium">
-                        <li class="flex justify-between border-b border-gray-100 pb-1"><span>Senin - Kamis</span> <span class="font-bold">08:00 - 15:30 WITA</span></li>
-                        <li class="flex justify-between border-b border-gray-100 pb-1"><span>Jumat</span> <span class="font-bold">08:00 - 11:30 WITA</span></li>
-                        <li class="flex justify-between border-b border-gray-100 pb-1"><span>Sabtu</span> <span>Libur Praktik</span></li>
-                        <li class="flex justify-between text-red-600 font-bold pt-1"><span>Minggu</span> <span>Libur Sekolah</span></li>
-                    </ul>
+                
+                <!-- Bottom -->
+                <div class="border-t border-gray-200 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-medium">
+                    <p class="text-slate-500">&copy; 2026 Jurusan TSM - SMK Negeri 1 Denpasar. Dibuat oleh Siswa untuk Masyarakat.</p>
+                    <span class="text-red-500 font-bold">Standard Operating Procedure (SOP) Tersertifikasi</span>
                 </div>
             </div>
-            <div class="border-t border-gray-200 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-medium">
-                <p class="text-blue-950">&copy; 2026 Jurusan TSM - SMK Negeri 1 Denpasar. Dibuat oleh Siswa untuk Masyarakat.</p>
-                <span class="text-red-600 font-bold">Standard Operating Procedure (SOP) Tersertifikasi</span>
-            </div>
-        </div>
-    </footer>
+        </footer>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const navbar = document.getElementById('navbar');
