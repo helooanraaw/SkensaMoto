@@ -245,40 +245,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Quotation approval section -->
-                                <template x-if="activeBooking?.quotation_status === 'sent'">
-                                    <div class="bg-orange-50 border border-orange-200 rounded-2xl p-5">
-                                        <h4 class="text-sm font-black text-orange-900 mb-2">Persetujuan Estimasi Biaya & Sparepart</h4>
-                                        <p class="text-xs text-orange-850 font-medium mb-4" x-text="'Catatan Kerusakan: ' + activeBooking?.catatan_kerusakan"></p>
-                                        
-                                        <form :action="'/user/booking/' + activeBooking?.id + '/approve-quotation'" method="POST" class="space-y-4">
-                                            @csrf @method('PATCH')
-                                            
-                                            <!-- List of spare parts with checkboxes -->
-                                            <div class="space-y-2">
-                                                <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Pilih Sparepart yang Disetujui:</p>
-                                                <template x-for="item in activeBooking?.pemakaian_barang" :key="item.id">
-                                                    <label class="flex items-center gap-3 p-3 border border-orange-200 rounded-xl cursor-pointer hover:bg-orange-100/50 transition-colors bg-white">
-                                                        <input type="checkbox" name="approved_items[]" :value="item.pivot.id.toString()" x-model="approvedItems" class="w-4 h-4 text-green-600 rounded border-orange-300 focus:ring-green-500">
-                                                        <div class="flex-1 flex justify-between text-sm">
-                                                            <span class="font-medium text-blue-950">
-                                                                <span x-text="item.nama_barang"></span>
-                                                                <span class="text-xs text-slate-500 ml-1" x-text="'x' + item.pivot.jumlah"></span>
-                                                            </span>
-                                                            <span class="font-bold text-slate-700" x-text="'Rp ' + (parseInt(item.harga_satuan) * parseInt(item.pivot.jumlah)).toLocaleString('id-ID')"></span>
-                                                        </div>
-                                                    </label>
-                                                </template>
-                                                <div x-show="!activeBooking?.pemakaian_barang || activeBooking?.pemakaian_barang.length === 0" class="text-xs text-slate-500 italic">Tidak ada sparepart tambahan yang ditawarkan.</div>
-                                            </div>
-                                            
-                                            <div class="flex gap-3 pt-2">
-                                                <button name="status" value="approved" class="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-sm shadow transition-all">Setujui Estimasi</button>
-                                                <button name="status" value="rejected" class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm shadow transition-all">Tolak Semua</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </template>
+
 
                                 <!-- Show Invoice summary if already completed or has active items -->
                                 <div class="border-t border-slate-200 pt-6" x-show="activeBooking?.status === 'completed' || (activeBooking?.pemakaian_barang && activeBooking?.pemakaian_barang.length > 0)">
@@ -313,7 +280,7 @@
                                         <div class="mb-4">
                                             <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 border-b border-slate-200 pb-1">Sparepart & Oli</p>
                                             <template x-for="item in activeBooking?.pemakaian_barang" :key="item.id">
-                                                <div class="flex justify-between text-sm mb-1" x-show="activeBooking?.quotation_status === 'sent' ? approvedItems.includes(item.pivot.id.toString()) : (item.pivot.is_approved == 1 || item.pivot.is_approved == true)">
+                                                <div class="flex justify-between text-sm mb-1" x-show="item.pivot.is_approved == 1 || item.pivot.is_approved == true">
                                                     <span class="font-medium text-blue-950">
                                                         <span x-text="item.nama_barang"></span> 
                                                         <span class="text-xs text-slate-500 ml-1" x-text="'x' + item.pivot.jumlah"></span>
@@ -345,7 +312,6 @@
                     activeBooking: null,
                     activeTab: 'all',
                     bookings: initialBookings,
-                    approvedItems: [],
                     get activeCount() {
                         return this.bookings.filter(b => ['pending', 'approved', 'in_progress'].includes(b.status)).length;
                     },
@@ -358,14 +324,6 @@
                     openModal(b) {
                         this.activeBooking = b;
                         this.showModal = true;
-                        this.approvedItems = [];
-                        if (b && b.pemakaian_barang) {
-                            b.pemakaian_barang.forEach(item => {
-                                if (item.pivot && (item.pivot.is_approved == 1 || item.pivot.is_approved == true)) {
-                                    this.approvedItems.push(item.pivot.id.toString());
-                                }
-                            });
-                        }
                     },
                     get calculateModalTotal() {
                         if (!this.activeBooking) return 0;
@@ -376,14 +334,8 @@
                         let totalSparepart = 0;
                         if (this.activeBooking.pemakaian_barang) {
                             this.activeBooking.pemakaian_barang.forEach(item => {
-                                if (this.activeBooking.quotation_status === 'sent') {
-                                    if (this.approvedItems.includes(item.pivot.id.toString())) {
-                                        totalSparepart += parseInt(item.harga_satuan || 0) * parseInt(item.pivot.jumlah || 0);
-                                    }
-                                } else {
-                                    if (item.pivot && (item.pivot.is_approved == 1 || item.pivot.is_approved == true)) {
-                                        totalSparepart += parseInt(item.harga_satuan || 0) * parseInt(item.pivot.jumlah || 0);
-                                    }
+                                if (item.pivot && (item.pivot.is_approved == 1 || item.pivot.is_approved == true)) {
+                                    totalSparepart += parseInt(item.harga_satuan || 0) * parseInt(item.pivot.jumlah || 0);
                                 }
                             });
                         }

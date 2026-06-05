@@ -32,22 +32,22 @@
             <!-- Calendar Body -->
             <div class="p-6">
                 <!-- Legend -->
-                <div class="mb-5 flex flex-wrap items-center justify-between gap-y-3 gap-x-6 bg-slate-50 px-5 py-3 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600">
+                <div class="mb-5 flex flex-wrap items-center justify-between gap-y-3 gap-x-6 bg-slate-50 px-5 py-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-650">
                     <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
                         <span class="flex items-center gap-2">
-                            <span class="w-3.5 h-3.5 rounded bg-emerald-50 border border-emerald-300 block shrink-0"></span>
-                            <span>Bisa Booking</span>
+                            <span class="w-3.5 h-3.5 rounded bg-emerald-50/40 border border-emerald-500/30 block shrink-0 shadow-xs"></span>
+                            <span class="text-emerald-800">Bisa Booking</span>
                         </span>
                         <span class="flex items-center gap-2">
-                            <span class="w-3.5 h-3.5 rounded bg-rose-50 border border-rose-300 block shrink-0"></span>
-                            <span>Kuota Penuh</span>
+                            <span class="w-3.5 h-3.5 rounded bg-rose-50/50 border border-rose-500/30 block shrink-0 shadow-xs"></span>
+                            <span class="text-rose-800">Kuota Penuh</span>
                         </span>
                         <span class="flex items-center gap-2">
-                            <span class="w-3.5 h-3.5 rounded bg-slate-100 border border-slate-300 block shrink-0"></span>
-                            <span>Hari Libur</span>
+                            <span class="w-3.5 h-3.5 rounded bg-slate-100/70 border border-slate-400/30 block shrink-0 shadow-xs"></span>
+                            <span class="text-slate-700">Hari Libur</span>
                         </span>
                         <span class="flex items-center gap-2">
-                            <span class="w-3.5 h-3.5 rounded bg-slate-50 border border-slate-200 block shrink-0 opacity-60"></span>
+                            <span class="w-3.5 h-3.5 rounded bg-slate-50/30 border border-slate-200/40 block shrink-0 opacity-60 shadow-xs"></span>
                             <span class="text-slate-400">Belum Buka</span>
                         </span>
                     </div>
@@ -70,24 +70,24 @@
                 <div class="grid grid-cols-7 gap-1.5 sm:gap-2.5">
                     <template x-for="(cell, index) in days" :key="index">
                         <div @click="selectDate(cell.dateStr)" 
-                             class="aspect-square rounded-xl p-2 sm:p-3 flex flex-col justify-between transition-colors duration-200 cursor-pointer relative group border text-left"
+                             class="aspect-square rounded-xl p-2 sm:p-3 flex flex-col justify-between transition-all duration-200 cursor-pointer relative group border text-left shadow-xs hover:scale-[1.02]"
                              :class="{
-                                 'border-slate-100 bg-slate-50/20 opacity-30 pointer-events-none': !cell.isCurrentMonth,
+                                 'border-slate-100 bg-slate-50/10 opacity-30 pointer-events-none': !cell.isCurrentMonth,
                                  
-                                 // Tutup (Belum ada jadwal)
-                                 'border-slate-200 bg-slate-50/20 text-slate-400': cell.isCurrentMonth && selectedDateStr !== cell.dateStr && !getSchedule(cell.dateStr),
+                                 // Tutup (Belum Buka)
+                                 'border-slate-200/40 bg-slate-50/30 text-slate-400 opacity-65': cell.isCurrentMonth && selectedDateStr !== cell.dateStr && !getSchedule(cell.dateStr),
                                  
                                  // Libur
-                                 'border-slate-200 bg-slate-100/40 text-slate-500': cell.isCurrentMonth && selectedDateStr !== cell.dateStr && getSchedule(cell.dateStr) && getSchedule(cell.dateStr).is_holiday,
+                                 'border-slate-400/30 bg-slate-100/60 text-slate-550 hover:bg-slate-100 hover:border-slate-400/60': cell.isCurrentMonth && selectedDateStr !== cell.dateStr && getSchedule(cell.dateStr) && getSchedule(cell.dateStr).is_holiday,
                                  
                                  // Penuh
-                                 'border-rose-250 bg-rose-50/20 text-slate-700 hover:bg-rose-50/40': cell.isCurrentMonth && selectedDateStr !== cell.dateStr && getSchedule(cell.dateStr) && !getSchedule(cell.dateStr).is_holiday && getSchedule(cell.dateStr).is_full,
+                                 'border-rose-500/30 bg-rose-50/40 text-slate-700 hover:bg-rose-50/60 hover:border-rose-500/60': cell.isCurrentMonth && selectedDateStr !== cell.dateStr && getSchedule(cell.dateStr) && !getSchedule(cell.dateStr).is_holiday && getSchedule(cell.dateStr).is_full,
                                  
                                  // Available
-                                 'border-slate-200 bg-white hover:border-slate-350 hover:bg-slate-50/30': cell.isCurrentMonth && selectedDateStr !== cell.dateStr && getSchedule(cell.dateStr) && !getSchedule(cell.dateStr).is_holiday && !getSchedule(cell.dateStr).is_full,
+                                 'border-emerald-500/30 bg-white text-emerald-700 hover:border-emerald-500/60 hover:bg-emerald-50/20': cell.isCurrentMonth && selectedDateStr !== cell.dateStr && getSchedule(cell.dateStr) && !getSchedule(cell.dateStr).is_holiday && !getSchedule(cell.dateStr).is_full,
                                  
                                  // Selected
-                                 'border-slate-800 bg-slate-800 text-white': selectedDateStr === cell.dateStr
+                                 'border-slate-800 bg-slate-800 text-white shadow-md transform scale-[1.03] z-10': selectedDateStr === cell.dateStr
                              }">
                             
                             <!-- Top Row: Date Num & Own Booking Indicator -->
@@ -105,7 +105,7 @@
                                               'text-slate-500 font-extrabold': cell.isCurrentMonth && selectedDateStr !== cell.dateStr && !isToday(cell.dateStr) && getSchedule(cell.dateStr) && getSchedule(cell.dateStr).is_holiday,
                                               
                                               // Tutup (Belum Buka)
-                                              'text-slate-450 font-extrabold': cell.isCurrentMonth && selectedDateStr !== cell.dateStr && !isToday(cell.dateStr) && !getSchedule(cell.dateStr),
+                                              'text-slate-400 font-extrabold': cell.isCurrentMonth && selectedDateStr !== cell.dateStr && !isToday(cell.dateStr) && !getSchedule(cell.dateStr),
                                               
                                               // Today States
                                               'bg-red-600 text-white font-extrabold': isToday(cell.dateStr) && selectedDateStr !== cell.dateStr,
@@ -293,30 +293,35 @@
                 Alpine.data('calendarApp', () => ({
                     currentDate: new Date(),
                     selectedDateStr: '',
+                    monthName: '',
+                    selectedDateFormatted: '',
                     bookings: {!! json_encode($bookingsJson) !!},
                     schedules: {!! json_encode($schedulesJson ?? []) !!},
                     days: [],
                     weekdays: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
 
                     init() {
+                        this.updateMonthName();
                         this.generateCalendar();
                         // Pre-select today if available
                         const todayStr = this.formatDateStr(new Date());
-                        this.selectedDateStr = todayStr;
+                        this.selectDate(todayStr);
                     },
 
                     prevMonth() {
-                        this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+                        this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() - 1, 1);
+                        this.updateMonthName();
                         this.generateCalendar();
                     },
 
                     nextMonth() {
-                        this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+                        this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 1);
+                        this.updateMonthName();
                         this.generateCalendar();
                     },
 
-                    get monthName() {
-                        return this.currentDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+                    updateMonthName() {
+                        this.monthName = this.currentDate.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
                     },
 
                     generateCalendar() {
@@ -401,13 +406,17 @@
 
                     selectDate(dateStr) {
                         this.selectedDateStr = dateStr;
+                        this.updateSelectedDateFormatted();
                     },
 
-                    get selectedDateFormatted() {
-                        if (!this.selectedDateStr) return '';
+                    updateSelectedDateFormatted() {
+                        if (!this.selectedDateStr) {
+                            this.selectedDateFormatted = '';
+                            return;
+                        }
                         const parts = this.selectedDateStr.split('-');
                         const date = new Date(parts[0], parts[1] - 1, parts[2]);
-                        return date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+                        this.selectedDateFormatted = date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
                     }
                 }));
             });

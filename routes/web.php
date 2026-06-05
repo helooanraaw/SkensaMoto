@@ -73,7 +73,6 @@ Route::middleware('auth')->group(function () {
         
         // Proses booking servis
         Route::post('/booking', [UserController::class, 'storeBooking'])->name('booking.store');
-        Route::patch('/booking/{booking}/approve-quotation', [UserController::class, 'approveQuotation'])->name('booking.approve_quotation'); // Setujuin biaya sparepart
         Route::get('/booking/{booking}/invoice', [UserController::class, 'downloadInvoice'])->name('booking.invoice'); // Download invoice PDF
         
         Route::get('/history', [UserController::class, 'history'])->name('history'); // Liat riwayat servis lama

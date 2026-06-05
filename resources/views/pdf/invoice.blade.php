@@ -214,7 +214,7 @@
 
             <!-- Spareparts -->
             @foreach($booking->pemakaian_barang as $barang)
-                @if($barang->pivot->disetujui)
+                @if($barang->pivot->is_approved)
                     @php 
                         $subtotal = $barang->pivot->jumlah * $barang->harga_satuan;
                         $totalSparepart += $subtotal;

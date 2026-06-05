@@ -182,46 +182,18 @@
                                                      </button>
                                                  </form>
                                              @elseif($booking->status == 'in_progress')
-                                                 @php
-                                                     $needsQuotation = false;
-                                                     foreach($booking->paket_servis as $paket) {
-                                                         if(str_contains(strtolower($paket->nama_paket), 'cek') || str_contains(strtolower($paket->nama_paket), 'kerusakan')) {
-                                                             $needsQuotation = true;
-                                                             break;
-                                                         }
-                                                     }
-                                                 @endphp
-
-                                                 @if(is_null($booking->quotation_status))
-                                                     @if($needsQuotation)
-                                                         <button type="button" @click="openQuotation({{ $booking->toJson() }}); open = false" class="w-full text-left px-4 py-2.5 text-xs font-bold text-indigo-600 hover:bg-indigo-50 transition-colors flex items-center gap-2 border-t border-slate-100">
-                                                             <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                                                             Kirim Estimasi
-                                                         </button>
-                                                     @else
-                                                         <form action="{{ route('admin.bookings.complete', $booking->id) }}" method="POST" class="block border-t border-slate-100" onsubmit="return confirm('Selesaikan servis ini?');">
-                                                             @csrf
-                                                             @method('PATCH')
-                                                             <button type="submit" class="w-full text-left px-4 py-2.5 text-xs font-bold text-green-600 hover:bg-green-50 transition-colors flex items-center gap-2">
-                                                                 <svg class="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                                                 Selesaikan Servis
-                                                             </button>
-                                                         </form>
-                                                     @endif
-                                                 @elseif($booking->quotation_status == 'sent')
-                                                     <div class="px-4 py-2.5 text-[10px] font-bold text-orange-600 bg-orange-50/50 italic border-t border-slate-100 leading-normal">
-                                                         Menunggu Acc Pelanggan
-                                                     </div>
-                                                 @elseif($booking->quotation_status == 'approved')
-                                                     <form action="{{ route('admin.bookings.complete', $booking->id) }}" method="POST" class="block border-t border-slate-100" onsubmit="return confirm('Selesaikan servis dengan sparepart yang disetujui?');">
-                                                         @csrf
-                                                         @method('PATCH')
-                                                         <button type="submit" class="w-full text-left px-4 py-2.5 text-xs font-bold text-green-600 hover:bg-green-50 transition-colors flex items-center gap-2">
-                                                             <svg class="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                                             Selesaikan Servis
-                                                         </button>
-                                                     </form>
-                                                 @endif
+                                                  <button type="button" @click="openQuotation({{ $booking->toJson() }}); open = false" class="w-full text-left px-4 py-2.5 text-xs font-bold text-indigo-600 hover:bg-indigo-50 transition-colors flex items-center gap-2 border-t border-slate-100">
+                                                      <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                                      Estimasi & Sparepart WA
+                                                  </button>
+                                                  <form action="{{ route('admin.bookings.complete', $booking->id) }}" method="POST" class="block border-t border-slate-100" onsubmit="return confirm('Selesaikan servis ini?');">
+                                                      @csrf
+                                                      @method('PATCH')
+                                                      <button type="submit" class="w-full text-left px-4 py-2.5 text-xs font-bold text-green-600 hover:bg-green-50 transition-colors flex items-center gap-2">
+                                                          <svg class="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                          Selesaikan Servis
+                                                      </button>
+                                                  </form>
                                              @elseif($booking->status == 'completed')
                                                  @if(($booking->payment_status ?? 'unpaid') === 'unpaid')
                                                      <form action="{{ route('admin.bookings.update_payment', $booking->id) }}" method="POST" class="block border-t border-slate-100" onsubmit="return confirm('Tandai servis ini sebagai Lunas?');">
@@ -327,14 +299,14 @@
                 <div class="fixed inset-0 overflow-y-auto flex items-center justify-center p-4">
                     <div @click.away="showQuotationModal = false" class="bg-white rounded-[24px] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all my-8 relative">
                         <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                            <h3 class="text-lg font-black text-blue-950">Kirim Estimasi Biaya <span x-text="activeBooking?.id"></span></h3>
+                            <h3 class="text-lg font-black text-blue-950">Buat Rincian Estimasi & WhatsApp <span x-text="activeBooking?.id"></span></h3>
                             <button @click="showQuotationModal = false" class="text-slate-400 hover:text-red-500">&times;</button>
                         </div>
                         <form :action="'/admin/bookings/' + activeBooking?.id + '/send-quotation'" method="POST" class="p-6 space-y-4">
                             @csrf
                             
                             <div class="bg-blue-50 text-blue-800 p-4 rounded-[14px] text-sm font-medium">
-                                Berikan catatan hasil diagnosis kerusakan dan rekomendasi sparepart. Pelanggan bisa mereview biayanya sebelum servis dieksekusi final.
+                                Masukkan catatan diagnosis kerusakan dan sparepart tambahan di bawah ini. Sistem akan otomatis menyimpan rincian ini ke database dan mengarahkan Anda untuk mengirim pesan konfirmasi WhatsApp ke pelanggan.
                             </div>
 
                             <div>
@@ -371,13 +343,21 @@
 
                             <div class="pt-4 flex justify-end gap-2">
                                 <button type="button" @click="showQuotationModal = false" class="px-5 py-2.5 rounded-full font-bold text-slate-500 hover:bg-slate-100 transition-colors">Batal</button>
-                                <button type="submit" class="px-5 py-2.5 bg-indigo-600 text-white rounded-full font-bold hover:bg-indigo-700 transition-colors shadow-lg">Kirim Estimasi ke Pelanggan</button>
+                                <button type="submit" class="px-5 py-2.5 bg-indigo-600 text-white rounded-full font-bold hover:bg-indigo-700 transition-colors shadow-lg">Simpan & Kirim WhatsApp</button>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
         </template>
+        
+        @if(session('open_wa_url'))
+            <x-slot name="scripts">
+                <script>
+                    window.open("{{ session('open_wa_url') }}", "_blank");
+                </script>
+            </x-slot>
+        @endif
 
         <!-- DETAIL MODAL (Admin) -->
         <template x-teleport="body">

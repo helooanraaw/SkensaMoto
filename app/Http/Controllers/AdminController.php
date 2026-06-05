@@ -246,7 +246,7 @@ class AdminController extends Controller
 
             $booking->update([
                 'catatan_kerusakan' => $request->catatan_kerusakan,
-                'quotation_status' => 'sent'
+                'quotation_status' => 'approved' // Set directly to approved to bypass web-app confirmation
             ]);
 
             // Clear previous if any
@@ -258,21 +258,67 @@ class AdminController extends Controller
                         'booking_id' => $booking->id,
                         'barang_id' => $itemId,
                         'jumlah' => $request->jumlah[$index],
-                        'is_approved' => true // Default true until user unchecks
+                        'is_approved' => true // Automatically approved
                     ]);
                 }
             }
 
             ProgresServis::create([
                 'booking_id' => $booking->id,
-                'status_log' => 'Mekanik telah mengecek motor. Estimasi biaya & penggantian sparepart menunggu persetujuan Anda.'
+                'status_log' => 'Mekanik telah mengecek motor dan menetapkan rincian estimasi biaya/sparepart.'
             ]);
 
             DB::commit();
-            return back()->with('success', 'Estimasi biaya berhasil dikirim ke pelanggan.');
+
+            // Build WhatsApp message template
+            $phone = $booking->user->nomor_telepon;
+            if ($phone) {
+                $phone = preg_replace('/[^0-9]/', '', $phone);
+                if (strpos($phone, '0') === 0) {
+                    $phone = '62' . substr($phone, 1);
+                }
+            } else {
+                $phone = '';
+            }
+
+            $message = "Halo *" . $booking->user->name . "*,\n";
+            $message .= "Kami dari *Bengkel SkensaMotoHub* ingin menginfokan rincian estimasi biaya servis untuk kendaraan Anda:\n\n";
+            $message .= "*Kendaraan:* " . $booking->kendaraan->merk . " " . $booking->kendaraan->tipe . " (" . $booking->kendaraan->plat_nomor . ")\n";
+            $message .= "*Diagnosis Kerusakan:* " . $request->catatan_kerusakan . "\n\n";
+
+            $message .= "*Rincian Estimasi Biaya:*\n";
+            // Jasa / Paket Servis
+            $totalJasa = 0;
+            foreach ($booking->paket_servis as $paket) {
+                $message .= "- [Jasa] " . $paket->nama_paket . ": Rp " . number_format($paket->harga_jasa, 0, ',', '.') . "\n";
+                $totalJasa += $paket->harga_jasa;
+            }
+
+            // Spare parts
+            $totalSparepart = 0;
+            if ($request->has('barang_id') && count($request->barang_id) > 0) {
+                $message .= "\n*Sparepart:*\n";
+                foreach ($request->barang_id as $index => $itemId) {
+                    $inventory = Inventory::findOrFail($itemId);
+                    $qty = $request->jumlah[$index];
+                    $subtotal = $inventory->harga_satuan * $qty;
+                    $totalSparepart += $subtotal;
+                    
+                    $message .= "- " . $inventory->nama_barang . " (" . $qty . " " . $inventory->satuan . "): Rp " . number_format($subtotal, 0, ',', '.') . "\n";
+                }
+            }
+
+            $grandTotal = $totalJasa + $totalSparepart;
+            $message .= "\n--------------------------------\n";
+            $message .= "*Total Estimasi:* Rp " . number_format($grandTotal, 0, ',', '.') . "\n\n";
+            $message .= "Mohon konfirmasi jika Anda menyetujui rincian estimasi di atas agar kami dapat melanjutkan pengerjaan servis. Terima kasih!";
+
+            $waUrl = "https://wa.me/" . $phone . "?text=" . urlencode($message);
+
+            return back()->with('success', 'Rincian estimasi berhasil disimpan. Mengarahkan ke WhatsApp...')->with('open_wa_url', $waUrl);
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Gagal mengirim estimasi: ' . $e->getMessage());
+            return back()->with('error', 'Gagal memproses estimasi: ' . $e->getMessage());
         }
     }
 
@@ -529,18 +575,39 @@ class AdminController extends Controller
         return back()->with('success', "Role {$user->name} berhasil diubah menjadi " . ucfirst($request->role) . ".");
     }
 
-    public function recap()
+    public function recap(Request $request)
     {
         if (auth()->user()->role !== 'superadmin') {
             abort(403);
         }
 
-        $allBookings = Booking::orderBy('tanggal', 'asc')->get();
-        $grouped = $allBookings->groupBy(function($booking) {
+        // Get filter inputs
+        $selectedYear = $request->input('year');
+        $selectedMonth = $request->input('month');
+
+        // Default to current year & month only on first load (no parameters in request)
+        if (!$request->has('year') && !$request->has('month')) {
+            $selectedYear = date('Y');
+            $selectedMonth = date('m');
+        }
+
+        $query = Booking::query();
+
+        if ($selectedYear) {
+            $query->whereYear('tanggal', $selectedYear);
+        }
+        if ($selectedMonth) {
+            $query->whereMonth('tanggal', $selectedMonth);
+        }
+
+        $allBookings = $query->orderBy('tanggal', 'asc')->get();
+        
+        // Monthly Recap Data
+        $monthlyGrouped = $allBookings->groupBy(function($booking) {
             return \Carbon\Carbon::parse($booking->tanggal)->format('Y-m');
         });
 
-        $recapData = $grouped->map(function($monthBookings, $key) {
+        $recapData = $monthlyGrouped->map(function($monthBookings, $key) {
             $completed = $monthBookings->where('status', 'completed');
             $revenue = $completed->sum('total_harga');
 
@@ -556,7 +623,7 @@ class AdminController extends Controller
             ];
         })->values()->sortByDesc('month');
 
-        // Chart data
+        // Monthly Chart Data
         $chartData = $recapData->sortBy('month');
         $chartMonths = [];
         $chartRevenue = [];
@@ -568,21 +635,121 @@ class AdminController extends Controller
             $chartBookingCount[] = $data['total_bookings'];
         }
 
-        return view('admin.recap.index', compact('recapData', 'chartMonths', 'chartRevenue', 'chartBookingCount'));
+        // Weekly Recap Data
+        $weeklyGrouped = $allBookings->groupBy(function($booking) {
+            return \Carbon\Carbon::parse($booking->tanggal)->format('o-W');
+        });
+
+        $weeklyRecapData = $weeklyGrouped->map(function($weekBookings, $key) {
+            $firstBooking = $weekBookings->first();
+            $carbonDate = \Carbon\Carbon::parse($firstBooking->tanggal);
+            $startOfWeek = $carbonDate->copy()->startOfWeek();
+            $endOfWeek = $carbonDate->copy()->endOfWeek();
+            
+            $completed = $weekBookings->where('status', 'completed');
+            $revenue = $completed->sum('total_harga');
+
+            return [
+                'week_key' => $key,
+                'week_label' => $startOfWeek->translatedFormat('d M Y') . ' - ' . $endOfWeek->translatedFormat('d M Y'),
+                'total_bookings' => $weekBookings->count(),
+                'completed_bookings' => $completed->count(),
+                'pending_bookings' => $weekBookings->where('status', 'pending')->count(),
+                'active_bookings' => $weekBookings->whereIn('status', ['approved', 'in_progress'])->count(),
+                'cancelled_bookings' => $weekBookings->whereIn('status', ['cancelled', 'rejected'])->count(),
+                'revenue' => $revenue,
+            ];
+        })->values()->sortByDesc('week_key');
+
+        // Weekly Chart Data
+        $chartWeeklyData = $weeklyRecapData->sortBy('week_key');
+        $chartWeeks = [];
+        $chartWeeklyRevenue = [];
+        $chartWeeklyBookingCount = [];
+
+        foreach ($chartWeeklyData as $data) {
+            $chartWeeks[] = $data['week_label'];
+            $chartWeeklyRevenue[] = $data['revenue'];
+            $chartWeeklyBookingCount[] = $data['total_bookings'];
+        }
+
+        // Extract available years dynamically in a DB-agnostic way (no YEAR() sql function)
+        $availableYears = Booking::orderBy('tanggal', 'desc')
+            ->pluck('tanggal')
+            ->map(function($date) {
+                return \Carbon\Carbon::parse($date)->format('Y');
+            })
+            ->unique()
+            ->values()
+            ->toArray();
+
+        if (empty($availableYears)) {
+            $availableYears = [date('Y')];
+        }
+
+        $monthsList = [
+            '01' => 'Januari',
+            '02' => 'Februari',
+            '03' => 'Maret',
+            '04' => 'April',
+            '05' => 'Mei',
+            '06' => 'Juni',
+            '07' => 'Juli',
+            '08' => 'Agustus',
+            '09' => 'September',
+            '10' => 'Oktober',
+            '11' => 'November',
+            '12' => 'Desember',
+        ];
+
+        return view('admin.recap.index', compact(
+            'recapData', 
+            'chartMonths', 
+            'chartRevenue', 
+            'chartBookingCount',
+            'weeklyRecapData',
+            'chartWeeks',
+            'chartWeeklyRevenue',
+            'chartWeeklyBookingCount',
+            'availableYears',
+            'monthsList',
+            'selectedYear',
+            'selectedMonth'
+        ));
     }
 
-    public function exportRecapExcel()
+    public function exportRecapExcel(Request $request)
     {
         if (auth()->user()->role !== 'superadmin') {
             abort(403);
         }
 
-        $allBookings = Booking::orderBy('tanggal', 'asc')->get();
-        $grouped = $allBookings->groupBy(function($booking) {
+        $selectedYear = $request->input('year');
+        $selectedMonth = $request->input('month');
+
+        // Default to current year & month only on first load (no parameters in request)
+        if (!$request->has('year') && !$request->has('month')) {
+            $selectedYear = date('Y');
+            $selectedMonth = date('m');
+        }
+
+        $query = Booking::query();
+
+        if ($selectedYear) {
+            $query->whereYear('tanggal', $selectedYear);
+        }
+        if ($selectedMonth) {
+            $query->whereMonth('tanggal', $selectedMonth);
+        }
+
+        $allBookings = $query->with(['user', 'kendaraan', 'paket_servis'])->orderBy('tanggal', 'asc')->get();
+        
+        // Monthly Recap Data
+        $monthlyGrouped = $allBookings->groupBy(function($booking) {
             return \Carbon\Carbon::parse($booking->tanggal)->format('Y-m');
         });
 
-        $recapData = $grouped->map(function($monthBookings, $key) {
+        $recapData = $monthlyGrouped->map(function($monthBookings, $key) {
             $completed = $monthBookings->where('status', 'completed');
             $revenue = $completed->sum('total_harga');
 
@@ -598,9 +765,38 @@ class AdminController extends Controller
             ];
         })->values()->sortByDesc('month');
 
+        // Weekly Recap Data
+        $weeklyGrouped = $allBookings->groupBy(function($booking) {
+            return \Carbon\Carbon::parse($booking->tanggal)->format('o-W');
+        });
+
+        $weeklyRecapData = $weeklyGrouped->map(function($weekBookings, $key) {
+            $firstBooking = $weekBookings->first();
+            $carbonDate = \Carbon\Carbon::parse($firstBooking->tanggal);
+            $startOfWeek = $carbonDate->copy()->startOfWeek();
+            $endOfWeek = $carbonDate->copy()->endOfWeek();
+            
+            $completed = $weekBookings->where('status', 'completed');
+            $revenue = $completed->sum('total_harga');
+
+            return [
+                'week_key' => $key,
+                'week_label' => $startOfWeek->translatedFormat('d M Y') . ' - ' . $endOfWeek->translatedFormat('d M Y'),
+                'total_bookings' => $weekBookings->count(),
+                'completed_bookings' => $completed->count(),
+                'pending_bookings' => $weekBookings->where('status', 'pending')->count(),
+                'active_bookings' => $weekBookings->whereIn('status', ['approved', 'in_progress'])->count(),
+                'cancelled_bookings' => $weekBookings->whereIn('status', ['cancelled', 'rejected'])->count(),
+                'revenue' => $revenue,
+            ];
+        })->values()->sortByDesc('week_key');
+
+        // Detailed transactions (newest first)
+        $detailedBookings = $allBookings->sortByDesc('tanggal');
+
         $filename = "rekap_pendapatan_booking_" . date('Ymd') . ".xls";
 
-        return response(view('admin.recap.excel', compact('recapData')))
+        return response(view('admin.recap.excel', compact('recapData', 'weeklyRecapData', 'detailedBookings')))
             ->header('Content-Type', 'application/vnd.ms-excel')
             ->header('Content-Disposition', "attachment; filename=\"$filename\"")
             ->header('Pragma', 'no-cache')

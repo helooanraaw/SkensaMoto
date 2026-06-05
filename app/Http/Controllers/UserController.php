@@ -166,67 +166,6 @@ class UserController extends Controller
         }
     }
 
-    // Fungsi pas user nyetujuin atau nolak estimasi biaya yang dikirim dari mekanik/admin
-    public function approveQuotation(Request $request, Booking $booking)
-    {
-        // Pengecekan biar user lain gak ngasal nyetujuin booking orang
-        if ($booking->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        // Pastiin pilihan statusnya antara 'approved' atau 'rejected'
-        $request->validate([
-            'status' => 'required|in:approved,rejected',
-            'approved_items' => 'array', // Ini list barang (sparepart) mana aja yang disetujui sama user
-        ]);
-
-        $status = $request->input('status');
-        $approvedIds = $request->approved_items ?? [];
-
-        // Kalau user nolak estimasi biayanya
-        if ($status === 'rejected') {
-            // Bikin semua status persetujuan barang di database jadi false (gak disetujuin)
-            \DB::table('pemakaian_barang')
-                ->where('booking_id', $booking->id)
-                ->update(['is_approved' => false]);
-
-            // Ubah status quotation jadi ditolak
-            $booking->update([
-                'quotation_status' => 'rejected'
-            ]);
-
-            // Catat log
-            ProgresServis::create([
-                'booking_id' => $booking->id,
-                'status_log' => 'Pelanggan menolak estimasi biaya.'
-            ]);
-
-            return back()->with('success', 'Estimasi biaya berhasil ditolak.');
-        } else {
-            // Kalau user setuju, kita cocokin mana barang yang dicentang setuju
-            $items = \DB::table('pemakaian_barang')->where('booking_id', $booking->id)->get();
-            
-            foreach ($items as $item) {
-                // Kalo ID barangnya ada di array checklist dari user, jadikan true, sisanya false
-                \DB::table('pemakaian_barang')
-                    ->where('id', $item->id)
-                    ->update(['is_approved' => in_array($item->id, $approvedIds)]);
-            }
-
-            // Ubah status jadi disetujui
-            $booking->update([
-                'quotation_status' => 'approved'
-            ]);
-
-            // Catat log progres
-            ProgresServis::create([
-                'booking_id' => $booking->id,
-                'status_log' => 'Pelanggan telah menyetujui estimasi biaya dan sparepart.'
-            ]);
-
-            return back()->with('success', 'Persetujuan biaya berhasil dikirim ke bengkel.');
-        }
-    }
 
     // Fungsi buat download file struk / invoice format PDF pas servis udah kelar
     public function downloadInvoice(\App\Models\Booking $booking)

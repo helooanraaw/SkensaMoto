@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,6 +27,21 @@
             will-change: max-width, width, background-color, border-radius, box-shadow, backdrop-filter, border-color;
         }
 
+        /* Navbar Menu Glassmorphism before scroll to prevent text color clashing */
+        #nav-menu-container {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #navbar:not(.is-scrolled) #nav-menu-container {
+            background-color: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 9999px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
     </style>
 </head>
 <body class="bg-white text-blue-950 antialiased selection:bg-red-100 selection:text-red-900">
@@ -49,16 +64,21 @@
                     
                     <!-- Menu (Tengah) -->
                     <div class="hidden lg:flex items-center justify-center w-2/4">
-                        <div class="flex items-center gap-8 px-2">
-                            <a href="#" class="nav-link text-blue-950/90 hover:text-red-600 font-bold nav-transition group-[.is-scrolled]/nav:text-blue-950/80 group-[.is-scrolled]/nav:hover:text-red-600">Beranda</a>
-                            <a href="#services" class="nav-link text-blue-950/90 hover:text-red-600 font-bold nav-transition group-[.is-scrolled]/nav:text-blue-950/80 group-[.is-scrolled]/nav:hover:text-red-600">Layanan Standar</a>
-                            <a href="#schedule" class="nav-link text-white/90 hover:text-white font-bold nav-transition group-[.is-scrolled]/nav:text-blue-950/80 group-[.is-scrolled]/nav:hover:text-red-600">Jadwal Booking</a>
+                        <div class="flex items-center gap-8 px-2" id="nav-menu-container">
+                            <a href="#" class="nav-link text-blue-950/90 hover:text-red-600 font-bold transition-colors duration-200 group-[.is-scrolled]/nav:text-blue-950/80 group-[.is-scrolled]/nav:hover:text-red-600">Beranda</a>
+                            <a href="#services" class="nav-link text-blue-950/90 hover:text-red-600 font-bold transition-colors duration-200 group-[.is-scrolled]/nav:text-blue-950/80 group-[.is-scrolled]/nav:hover:text-red-600">Layanan Standar</a>
+                            <a href="#schedule" class="nav-link text-blue-950/90 hover:text-red-600 font-bold transition-colors duration-200 group-[.is-scrolled]/nav:text-blue-950/80 group-[.is-scrolled]/nav:hover:text-red-600">Jadwal Booking</a>
                         </div>
                     </div>
 
                     <!-- Tombol (Kanan) -->
                     <div class="hidden lg:flex items-center justify-end w-1/4">
-                        <a href="/login" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-xl nav-transition">Booking Antrian</a>
+                        <a href="/login" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-xl transition-all duration-200 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            Masuk
+                        </a>
                     </div>
                 </div>
             </div>
@@ -76,10 +96,10 @@
             <div class="absolute inset-0 bg-slate-950/10"></div>
             
             <!-- Gradient Fade-in dari Kiri -->
-            <div class="absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-white to-transparent"></div>
+            <div class="absolute inset-y-0 left-0 w-2/3 bg-gradient-to-r from-white via-white/40 to-transparent"></div>
             
             <!-- Gradient Fade-in dari Bawah khusus mobile -->
-            <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-white to-transparent lg:hidden"></div>
+            <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-white via-white/30 to-transparent lg:hidden"></div>
         </div>
 
         <div class="max-w-7xl mx-auto relative z-10 w-full">
@@ -97,10 +117,10 @@
                         Layanan servis profesional seperti di Dealer Resmi, langsung di SMK Negeri 1 Denpasar. Dikerjakan oleh siswa-siswa terbaik Teknik Sepeda Motor di bawah pengawasan ketat instruktur tersertifikasi industri.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4 items-center relative z-20">
-                        <a href="/login" class="bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 w-full sm:w-auto ">
-                            Mulai Booking
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        <a href="#schedule" class="bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 w-full sm:w-auto">
+                            Lihat Jadwal & Antrean
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                             </svg>
                         </a>
                     </div>
@@ -129,34 +149,43 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
                 
                 <!-- Left Column: Booking Steps (Stacked Vertically) -->
-                <div class="lg:col-span-5 space-y-4">
+                <div class="lg:col-span-5 space-y-3">
                     <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Panduan Antrean</p>
-                    <h3 class="text-base font-black text-blue-950 mb-4 border-b border-slate-200/60 pb-2">3 Langkah Mudah Booking</h3>
-                    
+                    <h3 class="text-base font-black text-blue-950 mb-4 border-b border-slate-200/60 pb-2">4 Langkah Mudah Booking</h3>
+
                     <!-- Step 1 -->
-                    <div class="bg-white border border-slate-100 rounded-[20px] p-5 flex items-center gap-4 hover:border-red-300 hover:shadow-sm transition-all duration-300 shadow-sm">
-                        <div class="w-10 h-10 rounded-xl bg-red-50 text-red-500 font-black text-lg flex items-center justify-center shrink-0 border border-red-100">1</div>
+                    <div class="bg-white border border-slate-100 rounded-2xl p-5 flex items-start gap-4 hover:border-red-200 hover:shadow-sm transition-all duration-300 shadow-sm">
+                        <div class="w-9 h-9 rounded-xl bg-red-50 text-red-500 font-black text-base flex items-center justify-center shrink-0 border border-red-100">1</div>
                         <div>
-                            <h4 class="font-extrabold text-sm text-blue-950">Pilih Tanggal</h4>
-                            <p class="text-xs text-slate-500 font-semibold mt-1 leading-normal">Cek ketersediaan jadwal pada hari-hari di sebelah kanan. Pilih tanggal yang masih memiliki sisa kuota.</p>
+                            <h4 class="font-extrabold text-sm text-blue-950">Buat Akun & Masuk</h4>
+                            <p class="text-xs text-slate-500 font-medium mt-1 leading-relaxed">Daftarkan akun menggunakan nama lengkap dan nomor HP aktif. Proses registrasi cepat, hanya butuh 1 menit.</p>
                         </div>
                     </div>
 
                     <!-- Step 2 -->
-                    <div class="bg-white border border-slate-100 rounded-[20px] p-5 flex items-center gap-4 hover:border-red-300 hover:shadow-sm transition-all duration-300 shadow-sm">
-                        <div class="w-10 h-10 rounded-xl bg-red-50 text-red-500 font-black text-lg flex items-center justify-center shrink-0 border border-red-100">2</div>
+                    <div class="bg-white border border-slate-100 rounded-2xl p-5 flex items-start gap-4 hover:border-red-200 hover:shadow-sm transition-all duration-300 shadow-sm">
+                        <div class="w-9 h-9 rounded-xl bg-red-50 text-red-500 font-black text-base flex items-center justify-center shrink-0 border border-red-100">2</div>
                         <div>
-                            <h4 class="font-extrabold text-sm text-blue-950">Isi Keluhan Motor</h4>
-                            <p class="text-xs text-slate-500 font-semibold mt-1 leading-normal">Setelah masuk ke akun Anda, daftarkan motor Honda Anda dan tulis keluhan mesin secara detail.</p>
+                            <h4 class="font-extrabold text-sm text-blue-950">Pilih Tanggal & Paket</h4>
+                            <p class="text-xs text-slate-500 font-medium mt-1 leading-relaxed">Cek jadwal di panel kanan, pilih tanggal berwarna hijau (kuota tersedia), lalu tentukan paket servis yang sesuai.</p>
                         </div>
                     </div>
 
                     <!-- Step 3 -->
-                    <div class="bg-white border border-slate-100 rounded-[20px] p-5 flex items-center gap-4 hover:border-red-300 hover:shadow-sm transition-all duration-300 shadow-sm">
-                        <div class="w-10 h-10 rounded-xl bg-red-50 text-red-500 font-black text-lg flex items-center justify-center shrink-0 border border-red-100">3</div>
+                    <div class="bg-white border border-slate-100 rounded-2xl p-5 flex items-start gap-4 hover:border-red-200 hover:shadow-sm transition-all duration-300 shadow-sm">
+                        <div class="w-9 h-9 rounded-xl bg-red-50 text-red-500 font-black text-base flex items-center justify-center shrink-0 border border-red-100">3</div>
                         <div>
-                            <h4 class="font-extrabold text-sm text-blue-950">Bawa Sesuai Jadwal</h4>
-                            <p class="text-xs text-slate-500 font-semibold mt-1 leading-normal">Bawa motor ke bengkel MotoSkensa tepat waktu. Motor Anda akan langsung masuk area pengerjaan.</p>
+                            <h4 class="font-extrabold text-sm text-blue-950">Isi Data & Keluhan Motor</h4>
+                            <p class="text-xs text-slate-500 font-medium mt-1 leading-relaxed">Lengkapi data kendaraan (tipe motor & plat nomor) dan tuliskan keluhan mesin secara detail agar mekanik bisa mempersiapkan servis lebih awal.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="bg-white border border-slate-100 rounded-2xl p-5 flex items-start gap-4 hover:border-red-200 hover:shadow-sm transition-all duration-300 shadow-sm">
+                        <div class="w-9 h-9 rounded-xl bg-red-50 text-red-500 font-black text-base flex items-center justify-center shrink-0 border border-red-100">4</div>
+                        <div>
+                            <h4 class="font-extrabold text-sm text-blue-950">Datang & Servis Langsung</h4>
+                            <p class="text-xs text-slate-500 font-medium mt-1 leading-relaxed">Bawa motor tepat waktu sesuai jadwal booking. Motor Anda langsung masuk area pengerjaan tanpa perlu antre di lokasi.</p>
                         </div>
                     </div>
                 </div>
@@ -424,61 +453,76 @@
     </div>
 </div>
 <!-- Footer -->
-        <footer class="bg-slate-900 pt-12 pb-6">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-                    <!-- Logo & Description -->
-                    <div>
-                        <div class="flex items-center gap-2 mb-3">
-                            <img src="{{ asset('images/MotoSkensaLogo1.png') }}" alt="MotoSkensa Logo" class="h-8 w-auto" />
-                            <span class="font-extrabold text-lg tracking-tight text-white">Skensa<span class="text-red-500">Moto</span></span>
-                        </div>
-                        <p class="text-slate-400 text-sm">Jurusan Teknik Sepeda Motor (TSM)<br>SMK Negeri 1 Denpasar</p>
-                    </div>
-                    
-                    <!-- Location -->
-                    <div>
-                        <h4 class="text-white font-bold mb-3 text-xs uppercase tracking-wider flex items-center gap-2">
-                            Lokasi
-                        </h4>
-                        <div class="flex items-start gap-2 text-slate-400 text-sm leading-relaxed mb-2">
-                            <svg class="w-3 h-3 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                <path stroke-linecap="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            </svg>
-                            <span>Jl. H.O.S. Cokroaminoto No.84, Ubung, Denpasar Utara, Bali 80116</span>
-                        </div>
-                        <div class="flex items-center gap-2 text-slate-400 text-sm">
-                            <svg class="w-3 h-3 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                            </svg>
-                            <span>(0361) 422401</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Hours -->
-                    <div>
-                        <h4 class="text-white font-bold mb-3 text-xs uppercase tracking-wider flex items-center gap-2">
-                            <svg class="w-3 h-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            Jam Operasional
-                        </h4>
-                        <div class="space-y-1 text-sm">
-                            <div class="flex justify-between"><span class="text-slate-400">Senin - Kamis</span><span class="text-white font-medium">08:00 - 15:30</span></div>
-                            <div class="flex justify-between"><span class="text-slate-400">Jumat</span><span class="text-white font-medium">08:00 - 11:30</span></div>
-                            <div class="flex justify-between"><span class="text-slate-400">Sabtu - Minggu</span><span class="text-red-500 font-medium">Libur</span></div>
-                        </div>
-                    </div>
+<footer class="bg-slate-900 pt-16 pb-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Top Row: 3 columns -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+
+            <!-- Brand -->
+            <div>
+                <div class="flex items-center gap-2 mb-4">
+                    <img src="{{ asset('images/MotoSkensaLogo1.png') }}" alt="MotoSkensa Logo" class="h-9 w-auto" />
+                    <span class="font-extrabold text-xl tracking-tight text-white">Skensa<span class="text-red-500">Moto</span></span>
                 </div>
-                
-                <!-- Bottom -->
-                <div class="border-t border-gray-200 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-medium">
-                    <p class="text-slate-500">&copy; 2026 Jurusan TSM - SMK Negeri 1 Denpasar. Dibuat oleh Siswa untuk Masyarakat.</p>
-                    <span class="text-red-500 font-bold">Standard Operating Procedure (SOP) Tersertifikasi</span>
+                <p class="text-slate-400 text-sm leading-relaxed">Jurusan Teknik Sepeda Motor (TSM)<br>SMK Negeri 1 Denpasar</p>
+            </div>
+
+            <!-- Location -->
+            <div>
+                <h4 class="text-white font-bold mb-5 text-xs uppercase tracking-widest">Lokasi</h4>
+                <div class="flex items-start gap-3 text-slate-400 text-sm leading-relaxed mb-4">
+                    <svg class="w-3.5 h-3.5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <span>Jl. H.O.S. Cokroaminoto No.84, Ubung, Denpasar Utara, Bali 80116</span>
+                </div>
+                <div class="flex items-center gap-3 text-slate-400 text-sm">
+                    <svg class="w-3.5 h-3.5 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                    </svg>
+                    <span>(0361) 422401</span>
                 </div>
             </div>
-        </footer>
+
+            <!-- Hours -->
+            <div>
+                <h4 class="text-white font-bold mb-5 text-xs uppercase tracking-widest flex items-center gap-2">
+                    <svg class="w-3.5 h-3.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Jam Operasional
+                </h4>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Senin – Kamis</span>
+                        <span class="text-white font-medium">08:00 – 15:30</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Jumat</span>
+                        <span class="text-white font-medium">08:00 – 11:30</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Sabtu – Minggu</span>
+                        <span class="text-red-500 font-medium">Libur</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Divider -->
+        <div class="border-t border-slate-800"></div>
+
+        <!-- Bottom Row -->
+        <div class="pt-6 flex flex-col md:flex-row justify-between items-center gap-3">
+            <p class="text-slate-500 text-xs">&copy; 2026 Jurusan TSM &mdash; SMK Negeri 1 Denpasar. Dibuat oleh Siswa untuk Masyarakat.</p>
+            <span class="text-red-500 text-xs font-semibold tracking-wider">Standard Operating Procedure (SOP) Tersertifikasi</span>
+        </div>
+
+    </div>
+</footer>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const navbar = document.getElementById('navbar');

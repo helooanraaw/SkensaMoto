@@ -148,4 +148,68 @@ class RevisionsTest extends TestCase
         $response->assertSee('John D***');
         $response->assertSee('DK *** AB');
     }
+
+    public function test_admin_can_send_quotation_and_bypass_customer_confirmation()
+    {
+        $admin = User::create([
+            'name' => 'Admin Bengkel',
+            'email' => 'admin2@skensa.com',
+            'password' => bcrypt('password'),
+            'nomor_telepon' => '081234567890',
+            'role' => 'admin'
+        ]);
+
+        $user = User::create([
+            'name' => 'Pelanggan',
+            'email' => 'pelanggan@skensa.com',
+            'password' => bcrypt('password'),
+            'nomor_telepon' => '081234567899',
+            'role' => 'user'
+        ]);
+
+        $motor = Kendaraan::create([
+            'user_id' => $user->id,
+            'plat_nomor' => 'DK 2222 YY',
+            'merk' => 'Honda',
+            'tipe' => 'Vario',
+            'tahun' => 2022
+        ]);
+
+        $booking = Booking::create([
+            'user_id' => $user->id,
+            'kendaraan_id' => $motor->id,
+            'tanggal' => '2026-06-12',
+            'status' => 'in_progress',
+            'keluhan' => 'mesin mati'
+        ]);
+
+        $item = Inventory::create([
+            'nama_barang' => 'Oli Mesin MPX2',
+            'satuan' => 'Botol',
+            'stok' => 50,
+            'harga_satuan' => 45000
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->post(route('admin.bookings.send_quotation', $booking->id), [
+                'catatan_kerusakan' => 'Perlu ganti oli mesin.',
+                'barang_id' => [$item->id],
+                'jumlah' => [1]
+            ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('open_wa_url');
+
+        // Check if database updated quotation status directly to approved
+        $booking->refresh();
+        $this->assertEquals('approved', $booking->quotation_status);
+
+        // Check if spare part was saved as approved automatically
+        $pemakaian = \DB::table('pemakaian_barang')->where('booking_id', $booking->id)->first();
+        $this->assertNotNull($pemakaian);
+        $this->assertEquals($item->id, $pemakaian->barang_id);
+        $this->assertEquals(1, $pemakaian->jumlah);
+        $this->assertTrue((bool)$pemakaian->is_approved);
+    }
 }
+
